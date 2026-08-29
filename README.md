@@ -49,15 +49,17 @@ Outputs land in `outputs/`. Nothing else is written, and no network access is ne
 Table 5 (`tab:Claims`, which inferences are contaminated) is prose and has no computation
 behind it.
 
-The scripts write wherever `LAP_OUT` points, so they can regenerate the paper's exhibits in
-place:
+**Tables are emitted as bare `tabular` blocks.** The float, the caption and the label live in
+the paper's `.tex` files, where they can be edited without being overwritten on the next
+rebuild; the generated file is the numbers only. `make paper` copies the rebuilt exhibits into
+the paper tree — PDFs to `figs/`, tabulars to `tables/`:
 
 ```bash
-make all LAP_OUT=/path/to/paper/figs
+make paper PAPER=/path/to/RegretMetrics_NeuripsWorkshop
 ```
 
-`LAP_ROOT` relocates the data and cache directories the same way. Both default to this
-repository.
+`LAP_OUT` relocates the output directory and `LAP_ROOT` the data and cache directories; both
+default to this repository.
 
 ## Layout
 
@@ -151,12 +153,16 @@ original script was not kept. Example 1 itself is exact arithmetic and is unaffe
 
 ## Citation
 
+Shammas Ahmed, Computational Applied Mathematics & Operations Research, Rice University
+(<shammasahmed@rice.edu>) · Vishal Gupta, Data Sciences and Operations, University of Southern
+California (<guptavis@usc.edu>).
+
 ```bibtex
-@inproceedings{lookaheadpremium2026,
+@inproceedings{ahmed2026lookahead,
   title  = {The Look-Ahead Premium in Decision-Focused Learning},
-  author = {Gupta, Vishal and Ahmed, Shammas},
+  author = {Ahmed, Shammas and Gupta, Vishal},
   year   = {2026},
-  note   = {NeurIPS 2026 Workshop on Machine Learning and Operations Research}
+  note   = {Second Workshop on ML$\times$OR, NeurIPS 2026}
 }
 ```
 

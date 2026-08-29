@@ -14,7 +14,7 @@ CODE    := code
 OUT     ?= outputs
 export LAP_OUT = $(abspath $(OUT))
 
-.PHONY: all figures tables test test-fast portfolio clean help
+.PHONY: all figures tables test test-fast portfolio paper clean help
 
 all: figures tables
 
@@ -62,3 +62,12 @@ clean:
 
 help:
 	@sed -n '2,12p' Makefile
+
+# Copy the regenerated exhibits into the paper tree: PDFs to figs/, tabulars to
+# tables/.  The floats, captions and labels live in the .tex files and are not
+# touched.
+PAPER ?= ../RegretMetrics_NeuripsWorkshop
+paper: all
+	cp $(OUT)/*.pdf $(PAPER)/figs/
+	cp $(OUT)/*.tex $(PAPER)/tables/
+	@echo "copied into $(PAPER)"
