@@ -19,8 +19,8 @@ paper's own published per-replication results.
 ## Quick start
 
 ```bash
-git clone <this repository>
-cd lookahead-premium-code
+git clone https://github.com/vgupta1/lookahead-premium.git
+cd lookahead-premium
 pip install -r requirements.txt
 
 make all      # every figure and table  (~70 s)
