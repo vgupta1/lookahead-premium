@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+.venv/
+venv/
+_to_delete/
+
+# Generated artifacts.  outputs/ is rebuilt by `make all`; the two figures and
+# three tables the paper includes are tracked so a reader can see them without
+# running anything -- see the note in README.md.
+outputs/*.log

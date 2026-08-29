@@ -1,0 +1,24 @@
+{
+  "base_seed": 20260829,
+  "replications": 50,
+  "test_points": 2000,
+  "degrees": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "taus": [
+    1,
+    2
+  ],
+  "n_train": 1000,
+  "wbar": "e/d (their code; Appendix D says e/10, see the module docstring)",
+  "finished": "2026-08-29 08:08:36",
+  "elapsed_seconds": 39.8,
+  "python": "3.10.12",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
+  "numpy": "2.2.6",
+  "cvxpy": "1.7.5",
+  "solver": "CLARABEL"
+}

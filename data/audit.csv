@@ -1,0 +1,35 @@
+key,authors,venue,year,oracle,denominator,aggregation,noise,cross_regime,formula_stated,in_table1,status_note
+donti2017task,"Donti, Amos & Kolter",NeurIPS,2017,none,raw,mean,real,no,partial,yes,"reports task loss, not a regret"
+wilder2019melding,"Wilder, Dilkina & Tambe",AAAI,2019,none,raw,mean,real,qualitative,partial,yes,"reports objective, not a regret"
+elbalghiti2019generalization,"El Balghiti, Elmachtoub, Grigas & Tewari",NeurIPS,2019,unknown,unknown,unknown,unknown,unknown,unknown,no,"EXCLUDED, undocumented; experimental section unread (open_notes B0.2)"
+elmachtoub2020decision,"Elmachtoub, Liang & McNellis",ICML,2020,LA,oracle_cost,ratio_of_sums,yes,yes,yes,yes,normalized extra travel time
+pogancic2020differentiation,"Pogancic, Paulus, Musil, Martius & Rolinek",ICLR,2020,LA,none,indicators,none,qualitative,no,no,"EXCLUDED, noiseless; reports percent-optimal, not a regret"
+berthet2020learning,"Berthet, Blondel, Teboul, Cuturi, Vert & Bach",NeurIPS,2020,LA,true_sp_cost,unknown,none,no,no,no,"EXCLUDED, noiseless"
+mandi2020smart,Mandi & Guns,NeurIPS,2020,LA,raw,mean,real,no,yes,yes,
+wang2020automatically,"Wang, Wilder, Perrault & Tambe",NeurIPS,2020,LA,raw,unknown,real,yes,no,yes,cross-regime in problem size
+bertsimas2020predictive,Bertsimas & Kallus,MS,2020,LA,ref_policy_regret,aggregates,unknown,mild,yes,yes,coefficient of prescriptiveness; SAA reference
+mulamba2021contrastive,"Mulamba, Mandi, Diligenti, Lombardi, Bucarey & Guns",IJCAI,2021,LA,raw,mean,real,no,yes,yes,
+liu2021risk,Liu & Grigas,NeurIPS,2021,LA,none,none,unknown,unknown,yes,no,"EXCLUDED, theory only; reports no experimental metric"
+elmachtoub2022smart,Elmachtoub & Grigas,MS,2022,LA,oracle_cost,ratio_of_sums,yes,yes,yes,yes,"normalized SPO loss; ebar in {0, 0.5}"
+hu2022fast,"Hu, Kallus & Mao",MS,2022,TM,oracle_cost,ratio_of_sums,yes,yes,yes,yes,relative regret; never touches a realized Y
+mandi2022decision,"Mandi, Bucarey, Tchomba & Guns",ICML,2022,LA,per_instance,mean_of_ratios,yes,mild,yes,yes,learning to rank; percentage regret
+shah2022lodl,"Shah, Wang, Wilder, Perrault & Tambe",NeurIPS,2022,LA,ref_policy_regret,unknown,mixed,cross_problem,no,yes,normalized decision quality; random-prediction reference; formula reconstructed from its anchors
+silvestri2023score,Silvestri et al.,JAIR,2023,LA,not_stated,unknown,yes,partial,no,yes,denominator never stated
+tang2024pyepo,Tang & Khalil (PyEPO),MPC,2024,LA,oracle_cost,ratio_of_sums,yes,yes,yes,yes,library default; sum of |V(y_i)|
+tang2024cave,Tang & Khalil (CaVE),CPAIOR,2024,LA,oracle_cost,ratio_of_sums,yes,yes,yes,yes,venue not stated in the PDF
+mandi2024decision,"Mandi, Kotary, Berden, Mulamba, Bucarey, Guns & Fioretto",JAIR,2024,LA,per_instance,mean_of_ratios,yes,yes,yes,yes,Eq. 3 defines raw look-ahead regret; Eq. 50 reports a mean of ratios
+schutte2024robust,"Schutte, Postek & Yorke-Smith",IJCAI,2024,LA,not_stated,unknown,yes,yes,no,yes,mean normalized empirical regret; denominator never stated
+gupta2024directional,Gupta & Huang,NeurIPS,2024,TM,oracle_cost,ratio_of_sums,yes,yes,yes,yes,our own prior work
+sadana2025survey,"Sadana, Chenreddy, Delage, Forel, Frejinger & Vidal",EJOR,2025,LA,none,none,unknown,unknown,yes,no,"EXCLUDED, survey; reports no experimental metric"
+yang2025dff,Yang et al. (DFF),AAAI,2025,LA,oracle_cost,ratio_of_sums,unknown,yes,yes,yes,cross-regime in data size
+berden2025solver,"Berden, Mahmutogullari, Tsouros & Guns (LAVA)",NeurIPS,2025,LA,achieved_objective,ratio_of_sums,none,yes,yes,no,"EXCLUDED, noiseless; the only paper normalizing by the achieved objective"
+rodriguezdiaz2025decision,Rodriguez-Diaz et al. (DGL),NeurIPS,2025,LA,not_stated,unknown,unknown,partial,no,yes,test relative regret; denominator never stated
+mandi2025preprint,Mandi et al.,preprint,2025,LA,per_instance,mean_of_ratios,yes,no,yes,yes,normalized relative regret
+jeon2025prediction,"Jeon, Bae, Kim, Lee & Kim",preprint,2025,LA,ref_policy_regret,unknown,unknown,no,partial,yes,R_test / R_worst; worst-case reference
+capitaine2026online,Capitaine et al.,ICLR,2026,TM,raw,cumulative,yes,yes,yes,no,"EXCLUDED, undocumented; theory-side true-model comparator (open_notes B0.2)"
+lee2026pear,"Lee, Jin & Lee (PEAR)",ICML,2026,LA,oracle_cost,ratio_of_sums,mixed,yes,yes,yes,"main LP experiments noiseless, sweep 0.1-0.5; normalized regrets above 100% on portfolio"
+wan2026solver,Wan & Liu (WISE),ICML,2026,LA,oracle_cost,ratio_of_sums,yes,yes,yes,yes,Student-t noise; the control where the metric behaves
+benslimane2026online,Benslimane et al.,preprint,2026,LA,raw,sum,yes,partial,yes,yes,cumulative regret over t
+spitzer2026regret,Spitzer & Sanson,preprint,2026,LA,not_stated,unknown,unknown,yes,no,yes,regret as a percentage; never defined
+jiang2026coefficients,"Jiang, Tian & Wang",ERA,2026,TM,ref_policy_regret,aggregates,yes,unknown,yes,yes,adjusted coefficient of prescriptiveness; cross-regime cell OPEN (open_notes B0.3)
+elmachtoub2025stochastic,"Elmachtoub, Lam, Zhang & Zhao",preprint,2025,TM,none,none,yes,yes,yes,no,"EXCLUDED, nonlinear stochastic optimization; outside the reporting comparison"
