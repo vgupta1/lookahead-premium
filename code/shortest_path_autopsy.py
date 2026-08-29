@@ -88,6 +88,12 @@ import sys
 
 import numpy as np
 
+# Matplotlib stamps a /CreationDate into every PDF it writes, so an unchanged
+# figure regenerates as a different file and shows up as a git diff.  A fixed
+# SOURCE_DATE_EPOCH removes the timestamp and makes the output byte-reproducible.
+os.environ.setdefault("SOURCE_DATE_EPOCH", "1000000000")
+
+
 # ----------------------------------------------------------------------------
 # Configuration
 # ----------------------------------------------------------------------------

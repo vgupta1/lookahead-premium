@@ -120,6 +120,10 @@ builds rather than bit for bit; the self-test uses that tolerance and prints the
 difference. Everything else is exact arithmetic or plain Monte Carlo and reproduces bit for
 bit at a fixed NumPy version.
 
+Matplotlib stamps a creation date into every PDF it writes, so an unchanged figure would
+otherwise regenerate as a different file. The plotting scripts fix `SOURCE_DATE_EPOCH`, which
+removes the stamp: rebuilding an unchanged figure produces a byte-identical PDF and no diff.
+
 The published numbers were produced with Python 3.10.12 and the versions pinned in
 `requirements.txt`, on Linux (glibc 2.35).
 
