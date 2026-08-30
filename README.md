@@ -44,6 +44,7 @@ Outputs land in `outputs/`. Nothing else is written, and no network access is ne
 | Example 1 | Mean of ratios reverses a ranking | `python3 code/aggregation_example.py --example` | stdout | instant |
 | §C notes | Reversal frequencies over random benchmarks | `python3 code/aggregation_example.py --frequencies` | stdout | 1 s |
 | §C notes | Corrected vs their noiseless control | `python3 code/shortest_path_autopsy.py --report-control` | stdout | 5 s |
+| — | Mean-of-ratios reversal on the E&G shortest-path generator | `python3 code/aggregation_reversal.py --deg 8 --reps 8` | stdout | 3 min |
 | Table 4 | Re-run the portfolio Monte Carlo from scratch | `make portfolio` | `data/cache/portfolio_eta.csv` | ~2 h |
 
 Table 5 (`tab:Claims`, which inferences are contaminated) is prose and has no computation
@@ -71,6 +72,7 @@ code/
   two_action_construction.py  Fig. 3; the construction of Appendix E
   literature_audit.py         Table 1, from data/audit.csv
   aggregation_example.py      Example 1 and the reversal frequencies
+  aggregation_reversal.py     reversal on the E&G shortest-path generator
 data/
   eg/                         Elmachtoub & Grigas's published replication results
   audit.csv                   the literature audit, one row per paper
