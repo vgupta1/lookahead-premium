@@ -131,20 +131,37 @@ removes the stamp: rebuilding an unchanged figure produces a byte-identical PDF 
 The published numbers were produced with Python 3.10.12 and the versions pinned in
 `requirements.txt`, on Linux (glibc 2.35).
 
+## Table 1: the literature audit
+
+Every cell of Table 1 is generated from `data/audit.csv` by `code/literature_audit.py`, which
+also asserts the totals the paper prints, so a change to the data that would move a printed
+number fails loudly.
+
+The audit is a hand-built dataset, and the point of shipping it is that a reader can check it.
+`data/SCHEMA.md` documents the four inclusion rules, every column's vocabulary, and the
+definitions behind the two binary judgement columns (*potentially contaminated* and *synthetic*).
+`data/evidence.csv` carries one row per classification -- 497 rows over the 35 papers in the pool
+-- each giving the verbatim passage that supports it, with the PDF and page, or, where the claim
+is that a paper never states something, the search protocol that established it. Every quoted
+passage was checked mechanically against the page it cites. `data/RUBRIC.md` reproduces the
+instructions the AI readers worked from; the paper's implementation-notes appendix describes the
+process and its limitations.
+
+Judgement calls that a second reader could reasonably decide differently were adjudicated by the
+authors rather than resolved silently, and each is recorded as an `adjudication` row in
+`evidence.csv` with its reasoning. Three cases are worth knowing about: two papers are counted on
+a single qualifying experiment while their other experiments fall outside the paper's scope; one
+paper's metric is labelled from the benchmark suite its code derives from, because the paper
+itself never defines it; and the noise in a knapsack benchmark shared by three papers could not
+be settled from the papers' text and was established from the benchmark's public data.
+
+The audit is a sample, not a census, and a fuller version -- counting (paper, configuration)
+pairs rather than papers -- is future work.
+
 ## What this repository does not reproduce
 
-Two numbers in the paper do not yet come out of this code, and it is better to say so than to
-have a reader discover it.
-
-**Columns 2 and 3 of Table 1** — *potentially contaminated* and *synthetic* — are hand
-assignments. The row structure and the *Papers* column are generated from `data/audit.csv` and
-are asserted on every run, but the other two columns were per-paper reading judgements whose
-per-paper resolution was not recorded; only the sub-row totals survive. The audit's own fields
-*bracket* the printed values rather than reproducing them: counting only unhedged `cross_regime`
-entries gives 13 of 26 papers, counting every hedge gives 21, and the paper prints 16.
-`python3 code/literature_audit.py --reconcile` prints both gaps sub-row by sub-row and names the
-papers whose classification decides them. Adding two binary columns to `audit.csv` closes this,
-after which `--contaminated audit` generates the whole table.
+One number in the paper does not come out of this code, and it is better to say so than to have a
+reader discover it.
 
 **The conditional reversal frequencies** quoted in Appendix C are not reproducible from the
 generative model as the appendix states it. The overall frequency is: this repository gives

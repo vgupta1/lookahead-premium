@@ -33,23 +33,22 @@ import two_action_construction as two      # noqa: E402
 # Table 1 -- the literature audit
 # --------------------------------------------------------------------------
 
-def test_audit_row_structure_matches_table1():
-    """Every Papers count in Table 1 comes out of audit.csv."""
+def test_audit_table1_is_fully_generated():
+    """Every cell of Table 1 -- rows, Papers, contaminated, synthetic -- comes out of audit.csv
+    and matches the totals the paper prints (EXPECTED in literature_audit.py)."""
     assert audit.check(audit.load())
 
 
-def test_audit_columns_2_and_3_are_still_hand_assigned():
-    """A guard, not a success: this fails once audit.csv can generate them.
-
-    When `contaminated` and `synthetic` are added to audit.csv (open_notes B0),
-    this test should be deleted and the generator switched to --contaminated audit.
-    """
+def test_audit_every_counted_paper_has_evidence():
+    """Each paper in Table 1 has evidence rows for the eight classification fields."""
+    import pandas as pd
     t = audit.load()
-    assert "contaminated" not in t.columns and "synthetic_col" not in t.columns
-    strict = int(t.strict.sum())
-    broad = int(t.broad.sum())
-    printed = audit.PUBLISHED_BLOCK["total"][1]
-    assert strict < printed < broad, (strict, printed, broad)
+    ev = pd.read_csv(os.path.join(os.path.dirname(audit.AUDIT), "evidence.csv"), dtype=str).fillna("")
+    need = {"metric_name", "oracle", "denominator", "aggregation", "noise", "synthetic",
+            "contaminated", "formula_stated"}
+    for key in t.key:
+        have = set(ev[ev.key == key].field)
+        assert need <= have, (key, sorted(need - have))
 
 
 # --------------------------------------------------------------------------
