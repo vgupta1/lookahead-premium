@@ -10,3 +10,10 @@ _to_delete/
 # three tables the paper includes are tracked so a reader can see them without
 # running anything -- see the note in README.md.
 outputs/*.log
+__pycache__/
+*.pyc
+
+# Scopus exports: Elsevier's terms restrict redistributing downloaded records,
+# and the abstracts are publisher copyright. See data/audit_journal/README.md.
+data/audit_journal/scopus_export_*.csv
+data/audit_journal/venue_sweep_2026-*.csv

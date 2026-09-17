@@ -1,0 +1,79 @@
+\section{Abstract-Stage Triage}
+\label{sec:ECTriage}
+
+The venue sweep returns \(379\) records at the eleven venues. Most are not about contextual
+optimization at all: the query is deliberately recall-oriented (\cref{sec:ECSearch}), and terms such
+as \emph{task loss} and \emph{differentiable optimization} are common in unrelated machine-learning
+work. Before obtaining full texts we therefore apply a single coarse filter, which we call
+\emph{abstract-stage triage}.
+
+We stress at the outset what this stage does \emph{not} do. It does not apply the inclusion rules of
+\cref{sec:ECInclusion}, and it does not determine whether a paper studies a stochastic parameter. It
+decides only which full texts are worth obtaining. Every substantive classification in this audit is
+made from the full text, for reasons documented below.
+
+\subsection{Why the Filter Is Not a Keyword Rule}
+
+The natural implementation is a keyword or topic rule applied to the abstract, and we initially
+adopted one: exclude a paper when its abstract indicates that no parameter is predicted, so that the
+optimization instance is fully observed and the learning task is to solve it faster. Papers of this
+kind -- amortized optimization, learned warm starts, neural combinatorial solvers -- are genuinely
+out of scope, since with no unobserved \(Y\) there are no two oracles and no premium.
+
+That rule fails systematically, and it fails on exactly the papers we can least afford to lose. We
+tested it against twelve papers already known to be in scope, judging each from its abstract alone.
+Four of the twelve would have been excluded: \citet{berthet2020learning},
+\citet{poganvcic2020differentiation}, \citet{sahoo2023backpropagation} and
+\citet{niepert2021implicit}. Each describes its
+\emph{method} -- differentiating through a combinatorial solver -- and leaves the \emph{setting}, in
+which a cost vector is predicted from context, to its experiments. Their abstracts contain no
+language about prediction at all.
+
+Abstracts at machine-learning venues foreground methodological contribution, so the papers most
+likely to be misread are precisely those in the differentiable-optimization lineage that the search
+was widened to capture. A referee has no way to
+detect such an exclusion from the published record, since an excluded paper leaves no trace. We
+therefore adopt a rule that never asks whether anything is predicted.
+
+\subsection{The Triage Rule}
+
+A record is retained when both of the following hold: an optimization or decision problem is the
+object of the work, and a learned component appears in the same pipeline. A record is excluded when
+there is no decision problem at all, when the only optimization is machinery for training or
+compressing a model (hyperparameter search, architecture search, pruning, distillation), or when the
+work is numerical simulation of a physical system. Records that cannot be judged are retained.
+
+The asymmetry is deliberate. A record wrongly retained costs one full-text retrieval; a record
+wrongly excluded is invisible for the remainder of the study.
+
+\subsection{Implementation and Reproducibility}
+
+The rule requires reading an abstract for what a paper is about, which no lexical pattern captures.
+We implement it as a language-model classifier under a fixed prompt, and treat the prompt as part of
+the method rather than as an implementation detail: it is versioned in the replication repository,
+states the criterion as enumerated inclusions and exclusions rather than as an abstract principle,
+and carries five worked examples with their reasoning, among them \citet{berthet2020learning} as a
+retained record. Two instructions in the prompt exist solely to prevent the failure above, and each
+records the evidence that motivated it.
+
+The model identifier is pinned and decoding is greedy. For each record we store the assigned
+bucket, a one-sentence rationale in the model's own words, a self-reported confidence, the model
+identifier, a hash of the prompt, and the run date. The rationale is what makes the stage auditable:
+a reader disagreeing with a particular exclusion can see the stated ground for it.
+
+We are careful not to overclaim here. Greedy decoding reduces run-to-run variation but does not
+eliminate it, and a provider-side model revision can move a borderline record. This is why the stage
+is validated on every execution against a labelled control set of papers known to be in scope,
+four of which -- the four named above -- carry no prediction language in their abstracts and are the
+binding test; the pipeline halts if any control record is excluded. We report the control-set result
+alongside the triage counts.
+
+\subsection{Scope of the Claim}
+
+Triage is a retrieval decision and we make no stronger claim for it. Its errors in the retaining
+direction are harmless, being corrected at full text; its errors in the excluding direction are the
+ones that matter, and the control set bounds them only on a set of twelve papers, which is small.
+Perhaps the most honest statement is that this stage is designed so that its failures are
+recoverable, not so that it is correct: every subsequent stage of the audit works from full texts,
+and the screening log records a reason for each exclusion so that a reader may disagree with any of
+them individually.

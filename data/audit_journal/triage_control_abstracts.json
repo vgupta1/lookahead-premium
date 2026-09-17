@@ -1,0 +1,102 @@
+{
+ "description": "Labelled positive control for triage_screen.py. Every record is a paper already included in the workshop-version audit and therefore known to be in scope, so the only acceptable triage bucket is CANDIDATE (UNCLEAR is retained downstream and also passes). Records marked difficulty='narrow' contain NO prediction or uncertainty language in their abstracts; they describe only the method. They are the binding test: an earlier abstract-stage rule that asked whether a parameter is predicted excluded all four.",
+ "created": "2026-09-17",
+ "records": [
+  {
+   "bibkey": "Pogancic2020_BlackboxSolvers",
+   "title": "Differentiation of Blackbox Combinatorial Solvers",
+   "abstract": "Achieving fusion of deep learning with combinatorial algorithms promises transformative changes to artificial intelligence. One possible approach is to introduce combinatorial building blocks into neural networks. Such end-to-end architectures have the potential to tackle combinatorial problems on raw input data such as ensuring global consistency in multi-object tracking or route planning on maps in robotics. In this work, we present a method that implements an efficient backward pass through blackbox implementations of combinatorial solvers with linear objective functions. We provide both theoretical and experimental backing. In particular, we incorporate the Gurobi MIP solver, Blossom V algorithm, and Dijkstra's algorithm into architectures that extract suitable features from raw inputs for the traveling salesman problem, the min-cost perfect matching problem and the shortest path problem.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "narrow"
+  },
+  {
+   "bibkey": "Sahoo2023_BackpropIdentity",
+   "title": "Backpropagation through Combinatorial Algorithms: Identity with Projection Works",
+   "abstract": "Embedding discrete solvers as differentiable layers has given modern deep learning architectures combinatorial expressivity and discrete reasoning capabilities. The derivative of these solvers is zero or undefined, therefore a meaningful replacement is crucial for effective gradient-based learning. Prior works rely on smoothing the solver with input perturbations, relaxing the solver to continuous problems, or interpolating the loss landscape with techniques that typically require additional solver calls, introduce extra hyper-parameters, or compromise performance. We propose a principled approach to exploit the geometry of the discrete solution space to treat the solver as a negative identity on the backward pass and further provide a theoretical justification. Our experiments demonstrate that such a straightforward hyper-parameter-free approach is able to compete with previous more complex methods on numerous experiments such as backpropagation through discrete samplers, deep graph matching, and image retrieval. Furthermore, we substitute the previously proposed problem-specific and label-dependent margin with a generic regularization procedure that prevents cost collapse and increases robustness.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "narrow"
+  },
+  {
+   "bibkey": "Niepert2021_ImplicitMLE",
+   "title": "Implicit MLE: Backpropagating Through Discrete Exponential Family Distributions",
+   "abstract": "Combining discrete probability distributions and combinatorial optimization problems with neural network components has numerous applications but poses several challenges. We propose Implicit Maximum Likelihood Estimation (I-MLE), a framework for end-to-end learning of models combining discrete exponential family distributions and differentiable neural components. I-MLE is widely applicable as it only requires the ability to compute the most probable states and does not rely on smooth relaxations. The framework encompasses several approaches such as perturbation-based implicit differentiation and recent methods to differentiate through black-box combinatorial solvers. We introduce a novel class of noise distributions for approximating marginals via perturb-and-MAP. Moreover, we show that I-MLE simplifies to maximum likelihood estimation when used in some recently studied learning settings that involve combinatorial solvers. Experiments on several datasets suggest that I-MLE is competitive with and often outperforms existing approaches which rely on problem-specific relaxations.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "narrow"
+  },
+  {
+   "bibkey": "Ferber2020_MIPaaL",
+   "title": "MIPaaL: Mixed Integer Program as a Layer",
+   "abstract": "Machine learning components commonly appear in larger decision-making pipelines; however, the model training process typically focuses only on a loss that measures average accuracy between predicted values and ground truth values. Decision-focused learning explicitly integrates the downstream decision problem when training the predictive model, in order to optimize the quality of decisions induced by the predictions. It has been successfully applied to several limited combinatorial problem classes, such as those that can be expressed as linear programs (LP), and submodular optimization. However, these previous applications have uniformly focused on problems with simple constraints. Here, we enable decision-focused learning for the broad class of problems that can be encoded as a mixed integer linear program (MIP), hence supporting arbitrary linear constraints over discrete and continuous variables. We show how to differentiate through a MIP by employing a cutting planes solution approach, an algorithm that iteratively tightens the continuous relaxation by adding constraints removing fractional solutions. We evaluate our new end-to-end approach on several real world domains and show that it outperforms the standard two phase approaches that treat prediction and optimization separately, as well as a baseline approach of simply applying decision-focused learning to the LP relaxation of the MIP. Lastly, we demonstrate generalization performance in several transfer learning tasks.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  },
+  {
+   "bibkey": "Wilder2019_MeldingDataDecisions",
+   "title": "Melding the Data-Decisions Pipeline: Decision-Focused Learning for Combinatorial Optimization",
+   "abstract": "Creating impact in real-world settings requires artificial intelligence techniques to span the full pipeline from data, to predictive models, to decisions. These components are typically approached separately: a machine learning model is first trained via a measure of predictive accuracy, and then its predictions are used as input into an optimization algorithm which produces a decision. However, the loss function used to train the model may easily be misaligned with the end goal, which is to make the best decisions possible. Hand-tuning the loss function to align with optimization is a difficult and error-prone process (which is often skipped entirely). We focus on combinatorial optimization problems and introduce a general framework for decision-focused learning, where the machine learning model is directly trained in conjunction with the optimization algorithm to produce high-quality decisions. Technically, our contribution is a means of integrating common classes of discrete optimization problems into deep learning or other predictive models, which are typically trained via gradient descent. The main idea is to use a continuous relaxation of the discrete problem to propagate gradients through the optimization procedure. We instantiate this framework for two broad classes of combinatorial problems: linear programs and submodular maximization. Experimental results across a variety of domains show that decision-focused learning often leads to improved optimization performance compared to traditional methods. We find that standard measures of accuracy are not a reliable proxy for a predictive model's utility in optimization, and our method's ability to specify the true goal as the model's training objective yields substantial dividends across a range of decision problems.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  },
+  {
+   "bibkey": "Berthet2020_PerturbedOptimizers",
+   "title": "Learning with Differentiable Perturbed Optimizers",
+   "abstract": "Machine learning pipelines often rely on optimization procedures to make discrete decisions (e.g., sorting, picking closest neighbors, or shortest paths). Although these discrete decisions are easily computed, they break the back-propagation of computational graphs. In order to expand the scope of learning problems that can be solved in an end-to-end fashion, we propose a systematic method to transform optimizers into operations that are differentiable and never locally constant. Our approach relies on stochastically perturbed optimizers, and can be used readily together with existing solvers. Their derivatives can be evaluated efficiently, and smoothness tuned via the chosen noise amplitude. We also show how this framework can be connected to a family of losses developed in structured prediction, and give theoretical guarantees for their use in learning tasks. We demonstrate experimentally the performance of our approach on various tasks.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "narrow"
+  },
+  {
+   "bibkey": "Berden2025_LAVA",
+   "title": "Solver-Free Decision-Focused Learning for Linear Optimization Problems",
+   "abstract": "Mathematical optimization is a fundamental tool for decision-making in a wide range of applications. However, in many real-world scenarios, the parameters of the optimization problem are not known a priori and must be predicted from contextual features. This gives rise to predict-then-optimize problems, where a machine learning model predicts problem parameters that are then used to make decisions via optimization. A growing body of work on decision-focused learning (DFL) addresses this setting by training models specifically to produce predictions that maximize downstream decision quality, rather than accuracy. While effective, DFL is computationally expensive, because it requires solving the optimization problem with the predicted parameters at each loss evaluation. In this work, we address this computational bottleneck for linear optimization problems, a common class of problems in both DFL literature and real-world applications. We propose a solver-free training method that exploits the geometric structure of linear optimization to enable efficient training with minimal degradation in solution quality. Our method is based on the insight that a solution is optimal if and only if it achieves an objective value that is at least as good as that of its adjacent vertices on the feasible polytope. Building on this, our method compares the estimated quality of the ground-truth optimal solution with that of its precomputed adjacent vertices, and uses this as loss function. Experiments demonstrate that our method significantly reduces computational cost while maintaining high decision quality.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  },
+  {
+   "bibkey": "Shah2022_LODL",
+   "title": "Decision-Focused Learning without Differentiable Optimization: Learning Locally Optimized Decision Losses",
+   "abstract": "Decision-Focused Learning (DFL) is a paradigm for tailoring a predictive model to a downstream optimization task that uses its predictions in order to perform better on that specific task. The main technical challenge associated with DFL is that it requires being able to differentiate through the optimization problem, which is difficult due to discontinuous solutions and other challenges. Past work has largely gotten around this issue by handcrafting task-specific surrogates to the original optimization problem that provide informative gradients when differentiated through. However, the need to handcraft surrogates for each new task limits the usability of DFL. In addition, there are often no guarantees about the convexity of the resulting surrogates and, as a result, training a predictive model using them can lead to inferior local optima. In this paper, we do away with surrogates altogether and instead learn loss functions that capture task-specific information. To the best of our knowledge, ours is the first approach that entirely replaces the optimization component of decision-focused learning with a loss that is automatically learned. Our approach (a) only requires access to a black-box oracle that can solve the optimization problem and is thus generalizable, and (b) can be convex by construction and so can be easily optimized over. We evaluate our approach on three resource allocation problems from the literature and find that our approach outperforms learning without taking into account task-structure in all three domains, and even hand-crafted surrogates from the literature.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  },
+  {
+   "bibkey": "HuKallusMao2022_FastRates",
+   "title": "Fast Rates for Contextual Linear Optimization",
+   "abstract": "Incorporating side observations in decision making can reduce uncertainty and boost performance, but it also requires we tackle a potentially complex predictive relationship. While one may use off-the-shelf machine learning methods to separately learn a predictive model and plug it in, a variety of recent methods instead integrate estimation and optimization by fitting the model to directly optimize downstream decision performance. Surprisingly, in the case of contextual linear optimization, we show that the naive plug-in approach actually achieves regret convergence rates that are significantly faster than methods that directly optimize downstream decision performance. We show this by leveraging the fact that specific problem instances do not have arbitrarily bad near-dual-degeneracy. While there are other pros and cons to consider as we discuss and illustrate numerically, our results highlight a nuanced landscape for the enterprise to integrate estimation and optimization. Our results are overall positive for practice: predictive models are easy and fast to train using existing tools, simple to interpret, and, as we show, lead to decisions that perform very well.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  },
+  {
+   "bibkey": "TangKhalil2024_PyEPO",
+   "title": "PyEPO: A PyTorch-based End-to-End Predict-then-Optimize Library for Linear and Integer Programming",
+   "abstract": "In deterministic optimization, it is typically assumed that all problem parameters are fixed and known. In practice, however, some parameters may be a priori unknown but can be estimated from contextual information. A typical predict-then-optimize approach separates predictions and optimization into two distinct stages. Recently, end-to-end predict-then-optimize has emerged as an attractive alternative. This work introduces the PyEPO package, a PyTorch-based end-to-end predict-then-optimize library in Python. To the best of our knowledge, PyEPO (pronounced like pineapple with a silent \"n\") is the first such generic tool for linear and integer programming with predicted objective function coefficients. It includes various algorithms such as surrogate decision losses, black-box solvers, and perturbated methods. PyEPO offers a user-friendly interface for defining new optimization problems, applying state-of-the-art algorithms, and using custom neural network architectures. We conducted experiments comparing various methods on problems such as the Shortest Path, the Multiple Knapsack, and the Traveling Salesperson Problem, discussing empirical insights that may guide future research.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  },
+  {
+   "bibkey": "Donti2017_TaskBasedE2E",
+   "title": "Task-based End-to-end Model Learning in Stochastic Optimization",
+   "abstract": "With the increasing popularity of machine learning techniques, it has become common to see prediction algorithms operating within some larger process. However, the criteria by which we train these algorithms often differ from the ultimate criteria on which we evaluate them. This paper proposes an end-to-end approach for learning probabilistic machine learning models in a manner that directly captures the ultimate task-based objective for which they will be used, within the context of stochastic programming. We present three experimental evaluations of the proposed approach: a classical inventory stock problem, a real-world electrical grid scheduling task, and a real-world energy storage arbitrage task. We show that the proposed approach can outperform both traditional modeling and purely black-box policy optimization approaches in these applications.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  },
+  {
+   "bibkey": "Wang2020_CompactSurrogates",
+   "title": "Automatically Learning Compact Quality-aware Surrogates for Optimization Problems",
+   "abstract": "Solving optimization problems with unknown parameters often requires learning a predictive model to predict the values of the unknown parameters and then solving the problem using these values. Recent work has shown that including the optimization problem as a layer in the model training pipeline results in predictions of the unobserved parameters that lead to higher decision quality. Unfortunately, this process comes at a large computational cost because the optimization problem must be solved and differentiated through in each training iteration; furthermore, it may also sometimes fail to improve solution quality due to non-smoothness issues that arise when training through a complex optimization layer. To address these shortcomings, we learn a low-dimensional surrogate model of a large optimization problem by representing the feasible space in terms of meta-variables, each of which is a linear combination of the original variables. By training a low-dimensional surrogate model end-to-end, and jointly with the predictive model, we achieve: i) a large reduction in training and inference time; and ii) improved performance by focusing attention on the more important variables in the optimization and learning in a smoother space. Empirically, we demonstrate these improvements on a non-convex adversary modeling task, a submodular recommendation task and a convex portfolio optimization task.",
+   "abstract_source": "pasted by author from published version",
+   "expected": "CANDIDATE",
+   "difficulty": "explicit"
+  }
+ ]
+}
