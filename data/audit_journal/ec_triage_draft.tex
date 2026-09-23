@@ -61,6 +61,12 @@ bucket, a one-sentence rationale in the model's own words, a self-reported confi
 identifier, a hash of the prompt, and the run date. The rationale is what makes the stage auditable:
 a reader disagreeing with a particular exclusion can see the stated ground for it.
 
+Because greedy decoding does not make a language model deterministic, every record is classified
+three times and assigned its majority bucket, with the three individual buckets retained so that a
+split is visible rather than silently resolved. Re-running the classifier on one hundred records
+reproduced the assigned bucket in \(99\) cases. That figure concerns decoding variation alone, and we
+are explicit below that it is not the quantity a reader should care most about.
+
 We are careful not to overclaim here. Greedy decoding reduces run-to-run variation but does not
 eliminate it, and a provider-side model revision can move a borderline record. This is why the stage
 is validated on every execution against a labelled control set of papers known to be in scope,
@@ -68,12 +74,79 @@ four of which -- the four named above -- carry no prediction language in their a
 binding test; the pipeline halts if any control record is excluded. We report the control-set result
 alongside the triage counts.
 
+\subsection{Execution and Outcome}
+
+We executed the stage once on the \(379\) sweep records, under the pinned model identifier
+\texttt{claude-opus-4-5-20251101}. The three runs agreed unanimously on \(373\) records. Three
+records are proceedings front matter, removed by a prior rule rather than by the classifier. Three
+records split, and were ruled by hand; in all three the hand ruling confirmed the majority bucket, so
+they are recorded as adjudications rather than as corrections.
+
+A fourth record was re-ruled. It had been examined during the design phase described below, under a
+version of the prompt that was subsequently revised; the revision moved it from excluded to retained,
+and we judged that a verdict rendered against a superseded specification could not be carried
+forward unexamined. We re-read it under the current rule and excluded it. We record this because the
+general point governs any audit of this kind: a human verdict is a verdict about a stated rule, and
+it expires when the rule changes.
+
+After adjudication the stage retains \(158\) records and excludes \(221\). Adjudications are stored
+in a separate file and applied programmatically, so the classifier's output is never edited and every
+human override is visible as a difference between two files. No record belonging to the seed frame --
+the references of the two surveys from which the sampling frame is built (\cref{sec:ECSearch}) -- was
+excluded. This is a consistency check rather than a validation, since a survey's reference list is
+not a gold standard for our inclusion rules, but a failure here would have been informative.
+
+\subsection{Validating the Excluded Records}
+
+Triage errors in the retaining direction correct themselves at full text. Errors in the excluding
+direction do not, and they are therefore the quantity we measure. We measure them in two phases, and
+we keep the phases separate.
+
+\textbf{Design.} The first phase reports no statistic. We reviewed every excluded record whose
+recorded confidence was below high, together with every excluded record at an operations-research
+venue, where off-topic noise is rare: thirteen in all. Twelve confirmed the exclusion. The thirteenth
+was a paper whose learned component is an amortized solver for optimal transport, excluded on the
+stated ground that optimal transport there is a computational tool rather than a decision problem.
+That is a failure to follow the rule rather than a defect in the rule, and it exposed an ambiguity in
+how the rule was stated: the requirement of a learned component was being read as requiring a
+predictor of problem \emph{data}, so a learned \emph{solver} did not register as satisfying it. We
+revised the prompt to say that the learned component may be the solver itself, keeping both
+requirements in force -- a faster classical algorithm with nothing learned remains excluded, as does
+numerical simulation of a physical system with no decision problem.
+
+That revision moved \(15\) of the \(379\) records, which deserves comment: a filter whose output
+shifts under a small change to its instructions invites the suspicion that it is unstable. The prompt
+\emph{is} the operational definition of the rule, so a revision that moved nothing would mean it had
+not taken effect. The question is instead whether the records that moved are the ones the revision
+was about. Comparing the runs before and after, all fifteen lie on the boundary the revision redrew:
+six newly retained (amortized solvers for optimal transport and for mixed-integer programs, learned
+molecular docking), six newly excluded (bilevel optimization used as training machinery,
+treatment-effect estimation, learned navigation with no optimization problem formulated), and three
+moving through the undecided bucket. None lie elsewhere. We read this as a targeted edit rather than
+as drift.
+
+\textbf{Measurement.} With the prompt frozen, we drew a fresh random sample of \(50\) of the \(221\)
+excluded records and classified them by hand from title and abstract alone, with the model's bucket,
+rationale and confidence withheld so that the reading was independent of them. All \(50\) were
+confirmed excluded. Since the sample is a substantial fraction of a finite population, the
+appropriate bound is hypergeometric rather than binomial: with \(95\%\) confidence, at most \(11\) of
+the \(221\) excluded records are wrongly excluded. (The corresponding Clopper--Pearson bound, which
+discards the finite-population information, is \(5.8\%\), or \(12.9\) records.)
+
+The two phases cannot be pooled. Targeted sampling deliberately oversamples where errors are
+expected, so its error rate does not estimate the rate in the excluded pile; and a sample that drove
+a revision of the instrument is contaminated as a measurement of it.
+
 \subsection{Scope of the Claim}
 
-Triage is a retrieval decision and we make no stronger claim for it. Its errors in the retaining
-direction are harmless, being corrected at full text; its errors in the excluding direction are the
-ones that matter, and the control set bounds them only on a set of twelve papers, which is small.
-Perhaps the most honest statement is that this stage is designed so that its failures are
+Triage is a retrieval decision and we claim no more for it. The bound above is a bound on
+disagreement between the classifier and one reader applying the written rule. It is not evidence that
+the rule is the right one, which is argued in \cref{sec:ECInclusion} rather than estimated, and it is
+not a claim about language-model triage in general: it is a statement about this prompt, at the
+recorded hash, under the recorded model. We have not measured sensitivity to paraphrases of the
+prompt that preserve the rule, and the choice of model is not innocuous -- an earlier execution under
+a smaller model of the same family differed on \(23\) of the \(379\) records, retaining fewer of
+them. Perhaps the most honest statement is that this stage is designed so that its failures are
 recoverable, not so that it is correct: every subsequent stage of the audit works from full texts,
-and the screening log records a reason for each exclusion so that a reader may disagree with any of
+and the screening log records a ground for each exclusion so that a reader may disagree with any of
 them individually.

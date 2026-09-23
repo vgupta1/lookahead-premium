@@ -1,0 +1,51 @@
+order,sweep_id,venue,year,title
+1,SW0283,NeurIPS,2023,Tanimoto Random Features for Scalable Molecular Machine Learning
+2,SW0290,NeurIPS,2024,Aggregate-and-Adapt Natural Language Prompts for Downstream Generalization of CLIP
+3,SW0321,NeurIPS,2024,Typicalness-Aware Learning for Failure Detection
+4,SW0349,NeurIPS,2025,"Neural Rule Lists: Learning Discretizations, Rules, and Order in One Go"
+5,SW0277,NeurIPS,2023,Multi-body SE(3) Equivariance for Unsupervised Rigid Segmentation and Motion Estimation
+6,SW0091,CPAIOR,2023,"20th International Conference on the Integration of Constraint Programming, Artificial Intelligence, and Operations Research, CPAIOR 2023"
+7,SW0269,NeurIPS,2023,FABind: Fast and Accurate Protein-Ligand Binding
+8,SW0275,NeurIPS,2023,Locally Invariant Explanations: Towards Stable and Unidirectional Explanations through Local Invariant Learning
+9,SW0150,ICLR,2025,KINPFN: BAYESIAN APPROXIMATION OF RNA FOLDING KINETICS USING PRIOR-DATA FITTED NETWORKS
+10,SW0227,IJOC,2023,Interpretable Matrix Completion: A Discrete Optimization Approach
+11,SW0288,NeurIPS,2024,Adaptive and Optimal Second-order Optimistic Methods for Minimax Optimization
+12,SW0022,AAAI,2024,Fairness under Covariate Shift: Improving Fairness-Accuracy Tradeoff with Few Unlabeled Test Samples
+13,SW0145,ICLR,2025,DISTILLHGNN: A KNOWLEDGE DISTILLATION APPROACH FOR HIGH-SPEED HYPERGRAPH NEURAL NETWORKS
+14,SW0361,NeurIPS,2025,Template-Guided 3D Molecular Pose Generation via Flow Matching and Differentiable Optimization
+15,SW0066,AAAI,2026,Rethinking Flow and Diffusion Bridge Models for Speech Enhancement
+16,SW0305,NeurIPS,2024,Learning Structured Representations with Hyperbolic Embeddings
+17,SW0224,IJCAI,2025,Preference Identification by Interaction Overlap for Bundle Recommendation
+18,SW0134,ICLR,2024,SCALING PHYSICS-INFORMED HARD CONSTRAINTS WITH MIXTURE-OF-EXPERTS
+19,SW0202,ICML,2025,Differentiable Solver Search for Fast Diffusion Sampling
+20,SW0329,NeurIPS,2025,C3PO: Optimized Large Language Model Cascades with Probabilistic Cost Constraints for Reasoning
+21,SW0123,ICLR,2024,GOODHART'S LAW IN REINFORCEMENT LEARNING
+22,SW0203,ICML,2025,Instruction-Following Pruning for Large Language Models
+23,SW0108,ICLR,2023,GNNINTERPRETER: A PROBABILISTIC GENERATIVE MODEL-LEVEL EXPLANATION FOR GRAPH NEURAL NETWORKS
+24,SW0353,NeurIPS,2025,Regression Trees Know Calculus
+25,SW0057,AAAI,2026,DRIFT: Difference-Aware Reinforcement Through Iterative Fine-Tuning for Language Models
+26,SW0352,NeurIPS,2025,Puppeteer: Rig and Animate Your 3D Models
+27,SW0051,AAAI,2026,C3RL: Rethinking the Combination of Channel-independence and Channel-mixing from Representation Learning
+28,SW0045,AAAI,2025,ScoreNet: Consistency-driven Framework with Multi-side Information Fusion for Session-based Recommendation
+29,SW0105,ICLR,2023,BRAIN-LIKE REPRESENTATIONAL STRAIGHTENING OF NATURAL MOVIES IN ROBUST FEEDFORWARD NEURAL NETWORKS
+30,SW0084,AISTATS,2025,A Convex Relaxation Approach to Generalization Analysis for Parallel Positively Homogeneous Networks
+31,SW0302,NeurIPS,2024,Enabling Adaptive Agent Training in Open-Ended Simulators by Targeting Diversity
+32,SW0127,ICLR,2024,"LARGE CONTENT AND BEHAVIOR MODELS TO UNDERSTAND, SIMULATE, AND OPTIMIZE CONTENT AND BEHAVIOR"
+33,SW0138,ICLR,2025,ANTI-EXPOSURE BIAS IN DIFFUSION MODELS
+34,SW0316,NeurIPS,2024,"To Learn or Not to Learn, That is the Question - A Feature-Task Dual Learning Model of Perceptual Learning"
+35,SW0040,AAAI,2025,Integrating Large Language Models and Möbius Group Transformations for Temporal Knowledge Graph Embedding on the Riemann Sphere
+36,SW0065,AAAI,2026,Quiet Feature Learning in Algorithmic Tasks
+37,SW0120,ICLR,2024,BARLERIA: AN EFFICIENT TUNING FRAMEWORK FOR REFERRING IMAGE SEGMENTATION
+38,SW0172,ICML,2023,Surface Snapping Optimization Layer for Single Image Object Shape Reconstruction
+39,SW0270,NeurIPS,2023,FAMO: Fast Adaptive Multitask Optimization
+40,SW0272,NeurIPS,2023,Learning Descriptive Image Captioning via Semipermeable Maximum Likelihood Estimation
+41,SW0023,AAAI,2024,Frugal LMs Trained to Invoke Symbolic Solvers Achieve Parameter-Efficient Arithmetic Reasoning
+42,SW0265,NeurIPS,2023,Differentiable Registration of Images and LiDAR Point Clouds with VoxelPoint-to-Pixel Matching
+43,SW0233,IJOC,2025,An Efficient Optimization Model and Tabu Search–Based Global Optimization Approach for the Continuous p-Dispersion Problem
+44,SW0075,AISTATS,2023,Stochastic Methods for AUC Optimization subject to AUC-based Fairness Constraints
+45,SW0089,AISTATS,2025,Multi-Agent Credit Assignment with Pretrained Language Models
+46,SW0028,AAAI,2024,StockMixer: A Simple Yet Strong MLP-Based Architecture for Stock Price Forecasting
+47,SW0346,NeurIPS,2025,Learning and Planning Multi-Agent Tasks via an MoE-based World Model
+48,SW0079,AISTATS,2024,Explanation-based Training with Differentiable Insertion/Deletion Metric-aware Regularizers
+49,SW0144,ICLR,2025,DIFFERENTIABLE OPTIMIZATION OF SIMILARITY SCORES BETWEEN MODELS AND BRAINS
+50,SW0205,ICML,2025,Mechanistic PDE Networks for Discovery of Governing Equations

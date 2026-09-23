@@ -17,3 +17,11 @@ __pycache__/
 # and the abstracts are publisher copyright. See data/audit_journal/README.md.
 data/audit_journal/scopus_export_*.csv
 data/audit_journal/venue_sweep_2026-*.csv
+
+# Hand-review sheets: these quote the abstracts of the records under review
+# verbatim (publisher copyright, same grounds as the Scopus exports above).
+# The rulings they produced ARE committed, in triage_adjudications_<DATE>.csv,
+# phase2_verdicts_<DATE>.csv and seed_screen_review_<DATE>.csv.
+data/audit_journal/phase2_sheet_*.md
+data/audit_journal/triage_phase1_review.md
+data/audit_journal/triage_split_adjudication.md

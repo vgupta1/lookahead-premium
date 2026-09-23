@@ -1,0 +1,30 @@
+Seed-screen control set, 2026-09-22
+model=claude-opus-4-5-20251101 temperature=0 prompt_hash=37b31a8a9812
+26/26 passed (20 known-relevant must not be BACKGROUND; 6 obvious background must be BACKGROUND)
+
+  PASS [pos] SF0026 CANDIDATE  Learning with differentiable perturbed optimizers
+  PASS [pos] SF0281 CANDIDATE  Differentiation of blackbox combinatorial solvers
+  PASS [pos] SF0206 CANDIDATE  Implicit mle: Backpropagating through discrete exponent
+  PASS [pos] SF0245 CANDIDATE  Backpropagation through combinatorial algorithms: Ident
+  PASS [pos] SF0028 CANDIDATE  From predictive to prescriptive analytics
+  PASS [pos] SF0089 CANDIDATE  Smart ‘‘Predict, then Optimize’’
+  PASS [pos] SF0082 CANDIDATE  Task-based end-to-end model learning in stochastic opti
+  PASS [pos] SF0252 CANDIDATE  Decision-focused learning without decision-making: Lear
+  PASS [pos] SF0293 CANDIDATE  Melding the data-decisions pipeline: Decision-focused l
+  PASS [pos] SF0197 CANDIDATE  Contrastive losses and solution caching for predict-and
+  PASS [pos] SF0181 CANDIDATE  Interior point solving for LP-based prediction+optimisa
+  PASS [pos] SF0184 CANDIDATE  Decision-focused learning: Through the lens of learning
+  PASS [pos] SF0286 CANDIDATE  Automatically learning compact quality-aware surrogates
+  PASS [pos] SF0130 CANDIDATE  Fast rates for contextual linear optimization
+  PASS [pos] SF0171 CANDIDATE  Risk bounds and calibration for a smart predict-then-op
+  PASS [pos] SF0270 CANDIDATE  PyEPO: A PyTorch-based end-to-end predict-thenoptimize 
+  PASS [pos] SF0097 CANDIDATE  MIPaaL: Mixed integer program as a layer
+  PASS [pos] SF0086 CANDIDATE  Generalization bounds in the predict-then-optimize fram
+  PASS [pos] SF0087 CANDIDATE  Decision trees for decision-making under the predict-th
+  PASS [pos] SF0090 CANDIDATE  Estimate-then-optimize versus integrated-estimation-opt
+  PASS [neg] SF0017 BACKGROUND Information and exponential families: in statistical th
+  PASS [neg] SF0065 BACKGROUND Approximation by superpositions of a sigmoidal function
+  PASS [neg] SF0296 BACKGROUND Fluid antenna system for 6g: When bruce lee inspires wi
+  PASS [neg] SF0145 BACKGROUND The right to explanation, explained
+  PASS [neg] SF0163 BACKGROUND On information and sufficiency
+  PASS [neg] SF0199 BACKGROUND On estimating regression

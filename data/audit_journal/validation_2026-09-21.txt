@@ -1,0 +1,28 @@
+Search-recall validation, build 2026-09-21 (Scopus export of 2026-09-16)
+Scored against 2023 seed-survey entries published at the eleven venues.
+A MISS is a search-recall failure, NOT a gap in the corpus: these papers are
+already in the frame via the seed surveys.
+
+known 2023 papers at the eleven venues : 19
+recovered by the sweep                 : 14  (74%)
+missed                                 : 5
+
+  SF0007  MSOM     MISSED  Pricing for heterogeneous products: Analytics for ticket reselling
+  SF0098  CPAIOR   FOUND   Predicting wildlife trafficking routes with differentiable shortest paths
+  SF0099  ICML     MISSED  Surco: Learning linear surrogates for combinatorial nonlinear optimization probl
+  SF0101  ICML     FOUND   Explainable data-driven optimization: From context to decision and back again
+  SF0131  CPAIOR   FOUND   Branch & learn with post-hoc correction for predict+optimize with unknown parame
+  SF0132  AAAI     FOUND   Predict+optimize for packing and covering lps with unknown parameters in constra
+  SF0133  NeurIPS  FOUND   Two-stage predict+optimize for milps with unknown parameters in constraints
+  SF0160  IJCAI    FOUND   Backpropagation of unrolled solvers with folded optimization
+  SF0193  AAAI     MISSED  Adaptive perturbation-based gradient estimation for discrete latent variable mod
+  SF0218  MS       FOUND   Robust pricing and production with information partitioning and adaptation
+  SF0221  CPAIOR   FOUND   Contextual robust optimisation with uncertainty quantification
+  SF0229  MS       FOUND   A practical end-to-end inventory management model with deep learning
+  SF0242  ICML     FOUND   End-to-end learning for stochastic optimization: A Bayesian perspective
+  SF0245  ICLR     FOUND   Backpropagation through combinatorial algorithms: Identity with projection works
+  SF0263  AISTATS  MISSED  A unified perspective on regularization and perturbation in differentiable subse
+  SF0264  ICLR     FOUND   Alternating differentiation for optimization layers
+  SF0265  ICML     FOUND   Maximum optimality margin: A unified approach for contextual linear programming 
+  SF0289  ICML     MISSED  LinSATNet: The positive linear satisfiability neural networks
+  SF0308  MS       FOUND   Optimal robust policy for feature-based newsvendor

@@ -1,0 +1,5 @@
+sweep_id,run_bucket,vg_bucket,ruled_by,ruled_on,note
+SW0176,CANDIDATE,CANDIDATE,VG,2026-09-18,"Split 2/3. Adsorbate placement ruled a decision problem with a learned component; carried to full text where Gate A applies."
+SW0227,OUT,OUT,VG,2026-09-18,"Split 2/3. Discrete optimization is the estimation method; no downstream decision consumes the completed matrix. Consistent with the Phase 1 ruling on this record."
+SW0334,CANDIDATE,CANDIDATE,VG,2026-09-18,"Split 2/3. End-to-end driving: trajectory planning is a decision problem with learned components. Expected Gate A casualty at full text, but triage is permissive."
+SW0366,CANDIDATE,OUT,VG,2026-09-18,"Unanimous CANDIDATE under prompt 6cdbe58 overridden. Re-ruled after rule 2a changed the specification under which the Phase 1 OUT verdict was given; the data-driven demand distribution is an estimation input, not a predicted parameter feeding a decision objective."

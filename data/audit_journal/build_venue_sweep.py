@@ -12,16 +12,25 @@ INPUTS  (all in this directory)
                                    search_protocol.md section 5A.3. Export fields must include
                                    Abstract, Source title, Conference name, DOI, Link,
                                    Document Type, EID, Author Keywords and Index Keywords.
-  seed_frame_2026-09-10.csv        the 311 references of the two seed surveys, keyed by frame_id.
+  seed_frame_2026-09-21.csv        the 313 bibliography entries (305 distinct works) of the two seed
+                                   surveys, keyed by frame_id; see repair_seed_frame.py.
 
   The query went through five revisions during development (search_protocol.md 5A.2). The export of
   record, v5, was verified to return exactly the union of all five -- 379 in-venue records, none
   missing, none new -- which is what makes a single run sufficient. The superseded exports are
   archived outside the repository and no code reads them.
 
-OUTPUTS
-  venue_sweep_<DATE>.csv          one row per paper at the eleven venues, 2023-2026.
-  validation_<DATE>.txt           the recall check against the 2023 overlap year.
+OUTPUTS  (named by BUILD_DATE, not by the export date)
+  venue_sweep_<BUILD_DATE>.csv       one row per paper at the eleven venues, 2023-2026 (gitignored:
+                                     carries Scopus abstracts).
+  venue_sweep_keys_<BUILD_DATE>.csv  the same rows without abstracts or keywords -- the shareable file.
+  validation_<BUILD_DATE>.txt        the recall check against the 2023 overlap year.
+
+  2026-09-21 rebuild: the seed-frame join matched on a space-preserving normalized title only, so
+  five sweep records already in the frame carried no frame_id (hyphenation, a 'Technical Note--'
+  prefix, an abbreviated title, a retitled arXiv entry, a workshop version), and the recall check,
+  which used the same test, scored SF0133 a miss. Search recall on the 2023 year is 14/19, not 13/19.
+  The join is now link_frame_id() below. Records, venues and sweep_ids are unchanged.
 
 WHY THE VENUE FILTER IS LOCAL, NOT IN THE QUERY
   The Scopus query restricts SRCTITLE only loosely (see search_protocol.md 5A). Loose patterns
@@ -36,7 +45,17 @@ import csv, re, sys, glob, unicodedata, collections, datetime, os
 
 csv.field_size_limit(10**9)
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATE = "2026-09-16"
+DATE = "2026-09-16"          # date of the Scopus export of record
+BUILD_DATE = "2026-09-21"    # date of this build; names the outputs
+SEED_FRAME = "seed_frame_2026-09-21.csv"
+
+# Irreducible seed<->sweep links: same work, titles that no normalization equates. Keyed on the
+# Scopus EID so the link survives a title edit. Each needs a stated reason.
+CROSSWALK = {
+    "2-s2.0-85191167086": ("SF0133", "seed abbreviates 'Mixed Integer Linear Programs' as 'MILPs'"),
+    "2-s2.0-85163285221": ("SF0064", "seed cites the AAAI-23 workshop version of this AAAI-23 paper "
+                                     "(same five authors, retitled)"),
+}
 
 # ---------------------------------------------------------------- venue mapping
 # Each rule is (label, field-to-test, regex). Scopus records the venue in TWO places and
@@ -115,6 +134,12 @@ def norm(t):
     t = unicodedata.normalize("NFKD", t or "").lower()
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9 ]", " ", t)).strip()
 
+def key(t):
+    """Join key for seed<->sweep matching: letters and digits only (PDF extraction drops hyphens,
+    so 'datadriven' must equal 'data driven'), minus a leading 'Technical Note'."""
+    k = re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFKD", t or "").lower())
+    return k[len("technicalnote"):] if k.startswith("technicalnote") else k
+
 def get(row, key):
     return (row.get(key) or "").strip()
 
@@ -128,7 +153,7 @@ def load_export():
                  "It is deliberately not distributed with this repository (Elsevier's terms\n"
                  "restrict redistributing downloaded records). See README.md in this directory\n"
                  "for the query to run, the export fields required, and how to recover the exact\n"
-                 "record set from the EIDs in venue_sweep_keys_2026-09-16.csv.")
+                 "record set from the EIDs in venue_sweep_keys_2026-09-21.csv.")
     with open(p, encoding="utf-8-sig", newline="") as f:
         rows = list(csv.DictReader(f))
     required = ["Title", "Abstract", "Source title", "Conference name", "Year", "EID"]
@@ -146,11 +171,22 @@ def main():
 
     # seed frame, for the frame_id join and the validation
     seed = []
-    sp = os.path.join(HERE, "seed_frame_2026-09-10.csv")
+    sp = os.path.join(HERE, SEED_FRAME)
     if os.path.exists(sp):
         with open(sp, encoding="utf-8-sig", newline="") as f:
             seed = list(csv.DictReader(f))
-    seed_by_title = {norm(r["title"]): r["frame_id"] for r in seed if norm(r["title"])}
+    canon = {r["frame_id"]: (r.get("dup_of") or r["frame_id"]) for r in seed}
+    seed_by_key = {}
+    for r in seed:
+        if key(r["title"]) and r["title"] != "Vol":
+            seed_by_key.setdefault(key(r["title"]), canon[r["frame_id"]])
+
+    def link_frame_id(r):
+        """Canonical frame_id of a sweep record, or ''. Returns (frame_id, method)."""
+        if get(r, "EID") in CROSSWALK:
+            return canon[CROSSWALK[get(r, "EID")][0]], "crosswalk"
+        fid = seed_by_key.get(key(get(r, "Title")), "")
+        return fid, ("title" if fid else "")
 
     keep = []
     for r in rows:
@@ -168,17 +204,24 @@ def main():
             authors=get(r, "Authors"), abstract=get(r, "Abstract"), url=get(r, "Link"),
             doi=get(r, "DOI"),
             matched_keywords=";".join(hits) or "(scopus keyword-field match only)",
-            frame_id=seed_by_title.get(norm(get(r, "Title")), ""),
+            frame_id=link_frame_id(r)[0], frame_link=link_frame_id(r)[1],
             author_keywords=get(r, "Author Keywords"), index_keywords=get(r, "Index Keywords"),
             source_title=get(r, "Source title"), conference_name=get(r, "Conference name"),
             doc_type=get(r, "Document Type"), eid=get(r, "EID")))
 
-    outp = os.path.join(HERE, f"venue_sweep_{DATE}.csv")
+    outp = os.path.join(HERE, f"venue_sweep_{BUILD_DATE}.csv")
     cols = ["sweep_id","venue","year","title","authors","abstract","url","doi",
-            "matched_keywords","frame_id","author_keywords","index_keywords",
+            "matched_keywords","frame_id","frame_link","author_keywords","index_keywords",
             "source_title","conference_name","doc_type","eid"]
     with open(outp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(out)
+    kp = os.path.join(HERE, f"venue_sweep_keys_{BUILD_DATE}.csv")
+    kcols = ["sweep_id","venue","year","title","authors","doi","url","frame_id","frame_link",
+             "source_title","conference_name","doc_type","eid"]
+    with open(kp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=kcols, extrasaction="ignore"); w.writeheader(); w.writerows(out)
+    linked = [o["frame_id"] for o in out if o["frame_id"]]
+    assert len(linked) == len(set(linked)), "two sweep records linked to one seed work"
 
     vy = collections.Counter((o["venue"], o["year"]) for o in out)
     print("Papers at the eleven venues, 2023-2026:\n")
@@ -208,26 +251,29 @@ def main():
             ("MS", r"\bManagement Science\b"),
             ("MSOM", r"Manufacturing (and|&) Service Operations Management"),
             ("IJOC", r"INFORMS Journal on Computing")]
-    found = {norm(o["title"]) for o in out}
-    lines, tot, rec = [], 0, 0
+    # Scored per WORK, not per bibliography entry: a paper both surveys cite counts once, under
+    # its canonical frame_id. A work counts as FOUND iff some sweep record links to it.
+    found = {o["frame_id"] for o in out if o["frame_id"]}
+    lines, tot, rec, seen = [], 0, 0, set()
     for r in seed:
-        if r.get("year") != "2023":
+        if r.get("year") != "2023" or canon[r["frame_id"]] in seen:
             continue
         v = next((n for n, p in VPAT if re.search(p, r.get("full_entry", ""))), None)
         if not v:
             continue
+        seen.add(canon[r["frame_id"]])
         tot += 1
-        ok = norm(r["title"]) in found
+        ok = canon[r["frame_id"]] in found
         rec += ok
         lines.append(f"  {r['frame_id']}  {v:<8} {'FOUND  ' if ok else 'MISSED '} {r['title'][:80]}")
-    report = ([f"Search-recall validation, {DATE}",
+    report = ([f"Search-recall validation, build {BUILD_DATE} (Scopus export of {DATE})",
                "Scored against 2023 seed-survey entries published at the eleven venues.",
                "A MISS is a search-recall failure, NOT a gap in the corpus: these papers are",
                "already in the frame via the seed surveys.", "",
                f"known 2023 papers at the eleven venues : {tot}",
                f"recovered by the sweep                 : {rec}  ({rec/tot:.0%})" if tot else "",
                f"missed                                 : {tot-rec}", ""] + lines)
-    vp = os.path.join(HERE, f"validation_{DATE}.txt")
+    vp = os.path.join(HERE, f"validation_{BUILD_DATE}.txt")
     open(vp, "w", encoding="utf-8").write("\n".join(report) + "\n")
     print("\n" + "\n".join(report))
     print(f"\nwrote {vp}")
