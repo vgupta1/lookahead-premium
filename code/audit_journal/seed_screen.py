@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-seed_screen.py -- coarse screen of the seed-survey references (search_protocol.md 2.6, step 1).
+seed_screen.py -- coarse screen of the seed-survey references (journal_audit_protocol.md 2.6, step 1).
 
 The seed frame is the reference lists of the two seed surveys. Reference lists carry no abstracts,
 so this screen sees only the printed reference string. It sorts each cited WORK into

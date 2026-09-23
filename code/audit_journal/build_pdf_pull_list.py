@@ -1,7 +1,7 @@
 """Builds the PDF acquisition list handed to the student, from the adjudicated triage output.
 
 One row per CANDIDATE record, sorted by venue then year, carrying everything needed to find the
-paper plus the blank columns that become corpus.bib fields (search_protocol.md section 5).
+paper plus the blank columns that become corpus.bib fields (journal_audit_protocol.md section 5).
 
 Reads and writes data/audit_journal/; run from anywhere.
 """

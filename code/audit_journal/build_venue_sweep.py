@@ -9,13 +9,13 @@ and runs the search-recall validation.
 
 INPUTS  (all in this directory)
   scopus_export_2026-09-16_v5.csv  THE export of record: one Scopus run, the query in
-                                   search_protocol.md section 5A.3. Export fields must include
+                                   journal_audit_protocol.md section 5A.3. Export fields must include
                                    Abstract, Source title, Conference name, DOI, Link,
                                    Document Type, EID, Author Keywords and Index Keywords.
   seed_frame_2026-09-21.csv        the 313 bibliography entries (305 distinct works) of the two seed
                                    surveys, keyed by frame_id; see repair_seed_frame.py.
 
-  The query went through five revisions during development (search_protocol.md 5A.2). The export of
+  The query went through five revisions during development (journal_audit_protocol.md 5A.2). The export of
   record, v5, was verified to return exactly the union of all five -- 379 in-venue records, none
   missing, none new -- which is what makes a single run sufficient. The superseded exports are
   archived outside the repository and no code reads them.
@@ -33,7 +33,7 @@ OUTPUTS  (named by BUILD_DATE, not by the export date)
   The join is now link_frame_id() below. Records, venues and sweep_ids are unchanged.
 
 WHY THE VENUE FILTER IS LOCAL, NOT IN THE QUERY
-  The Scopus query restricts SRCTITLE only loosely (see search_protocol.md 5A). Loose patterns
+  The Scopus query restricts SRCTITLE only loosely (see journal_audit_protocol.md 5A). Loose patterns
   such as SRCTITLE("Operations Research") also return *Annals of*, *Computers and*, and
   *Lecture Notes in* Operations Research, and SRCTITLE("Lecture Notes in Computer Science*")
   returns all of LNCS rather than CPAIOR alone. Deciding venue membership HERE, in code that is
@@ -105,7 +105,7 @@ YEARS = ("2023", "2024", "2025", "2026")   # window: 2023 - Sep 2026. Scopus als
                                            # 2027-dated online-first records; excluded here.
 
 # ---------------------------------------------------------------- keyword record
-# Recorded as a SEARCH RECORD, never as a screening decision (search_protocol.md 2.6).
+# Recorded as a SEARCH RECORD, never as a screening decision (journal_audit_protocol.md 2.6).
 # Note these do not reproduce Scopus exactly: Scopus TITLE-ABS-KEY also searches author and
 # index KEYWORD fields, so a paper can be a legitimate hit with no phrase in title or abstract.
 # Those rows are labelled rather than dropped - Scopus's match governs.

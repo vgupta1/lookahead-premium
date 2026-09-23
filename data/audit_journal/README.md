@@ -1,7 +1,7 @@
 # Journal-version literature audit — the frame
 
 Piece 1 of the journal version: the sampling frame and the stage-1 screen. The protocol this
-implements is `search_protocol.md` (Dropbox folder root, outside this repository).
+implements is `notes/journal_audit_protocol.md`, in the project folder outside this repository.
 
 **This directory is the *new* audit. Nothing in `../` is touched.** The workshop-version audit
 (`../audit.csv`, `../evidence.csv`, `../SCHEMA.md`, `../RUBRIC.md`,
@@ -40,7 +40,7 @@ repository, and no code reads them — `build_venue_sweep.py` opens one named fi
 ## Reproducing the frame
 
 **1. Obtain the Scopus export.** In Scopus Advanced Search, run the query in
-`search_protocol.md` §5A.3 verbatim. It returned 829 records on 2026-09-16; a later run will return
+`journal_audit_protocol.md` §5A.3 verbatim. It returned 829 records on 2026-09-16; a later run will return
 more, since the venues keep publishing. Export to CSV including **Abstract, Source title, Conference
 name, DOI, Link, Document Type, EID, Author Keywords** and **Index Keywords**, and save it in this
 directory as
@@ -69,7 +69,7 @@ list) were built on the 2026-09-16 sweep table and are unchanged, since the tria
 
 The venue assignment is done here in code rather than in the Scopus query, deliberately: the
 `SRCTITLE` clauses are loose, and several venues need the `Conference name` field to be identified
-at all. `search_protocol.md` §5A.5 lists the eight indexing quirks encoded in the mapping — AAAI
+at all. `journal_audit_protocol.md` §5A.5 lists the eight indexing quirks encoded in the mapping — AAAI
 2023's ordinal source title and ICML/AISTATS sharing one PMLR title are the two that silently drop
 whole venue-years if you get them wrong.
 
@@ -122,7 +122,7 @@ from anywhere. Everything else below is in this directory.
 ## What this stage does not decide
 
 Triage is a retrieval decision: which full texts to obtain. Gates A and B
-(`search_protocol.md` §2.7) and the four inclusion rules are answered from full text, never from
+(`journal_audit_protocol.md` §2.7) and the four inclusion rules are answered from full text, never from
 abstracts. An earlier design screened Gate A from abstracts and wrongly excluded 4 of the 12 control
 papers, because machine-learning abstracts describe the method and leave the setting to the
 experiments. The prompt now carries two rules whose only purpose is to prevent that failure from

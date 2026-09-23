@@ -8,7 +8,7 @@ per-paper rationale are recorded. That is the point of this file: the judgement 
 below, under version control.
 
 It decides which PDFs to chase. It does NOT decide inclusion -- Gates A and B
-(search_protocol.md 2.7) and the four inclusion rules all require full text.
+(journal_audit_protocol.md 2.7) and the four inclusion rules all require full text.
 
     export ANTHROPIC_API_KEY=...
     python3 triage_screen.py --validate     # control set; always run this first
