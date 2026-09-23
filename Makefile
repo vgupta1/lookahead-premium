@@ -37,7 +37,7 @@ $(OUT)/tab_portfolio.tex: $(CODE)/portfolio_autopsy.py data/cache/portfolio_eta.
 	$(PY) $(CODE)/portfolio_autopsy.py --from-cache
 
 # Table 1.
-$(OUT)/tab_litaudit.tex: $(CODE)/literature_audit.py data/audit.csv
+$(OUT)/tab_litaudit.tex: $(CODE)/literature_audit.py data/audit_workshop/audit.csv
 	$(PY) $(CODE)/literature_audit.py
 
 # Table 5 draws on both autopsies.

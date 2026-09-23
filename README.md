@@ -70,12 +70,14 @@ code/
   portfolio_autopsy.py        Table 4; the portfolio premium (the long computation)
   make_autopsy_table.py       Table 3, from the two autopsies above
   two_action_construction.py  Fig. 3; the construction of Appendix E
-  literature_audit.py         Table 1, from data/audit.csv
+  literature_audit.py         Table 1, from data/audit_workshop/audit.csv
   aggregation_example.py      Example 1 and the reversal frequencies
   aggregation_reversal.py     reversal on the E&G shortest-path generator
 data/
   eg/                         Elmachtoub & Grigas's published replication results
-  audit.csv                   the literature audit, one row per paper
+  audit_workshop/             the workshop paper's literature audit: audit.csv,
+                              evidence.csv, SCHEMA.md, RUBRIC.md
+  audit_journal/              the journal version's audit: frame, screens, audit list
   cache/portfolio_eta.csv     the portfolio premium, one row per replication
 outputs/                      everything the paper prints
 tests/                        the reproduction tests
@@ -97,7 +99,7 @@ plotting and replication scripts; the relevant mapping is recorded in the docstr
 script does, so the "reported" row of every table in this repository is their number, not a
 re-run.
 
-**`data/audit.csv`.** One row per paper: which oracle, which denominator, which aggregation,
+**`data/audit_workshop/audit.csv`.** One row per paper: which oracle, which denominator, which aggregation,
 whether the DGP carries noise, and whether the paper draws conclusions across regimes. Papers
 are classified by *what they wrote*, not by what their released code computes. The two
 exclusion rules — noiseless DGPs, and papers reporting no experimental regret-like metric —
@@ -133,17 +135,27 @@ The published numbers were produced with Python 3.10.12 and the versions pinned 
 
 ## Table 1: the literature audit
 
-Every cell of Table 1 is generated from `data/audit.csv` by `code/literature_audit.py`, which
+**Moved 2026-09-23.** These four files were `data/audit.csv`, `data/evidence.csv`,
+`data/SCHEMA.md` and `data/RUBRIC.md` until the journal version's audit arrived and needed a
+folder of its own; they are now in `data/audit_workshop/`. The workshop paper prints the old
+paths, which resolve at the tag `workshop-submission` — `git checkout workshop-submission`
+reproduces the submitted state exactly. `RUBRIC.md` is reproduced as it was issued to the AI
+readers and `SCHEMA.md` as it was released with the workshop paper; neither was edited for the
+move, so a `data/...` path inside them means `data/audit_workshop/...`.
+
+Every cell of Table 1 is generated from `data/audit_workshop/audit.csv` by
+`code/literature_audit.py`, which
 also asserts the totals the paper prints, so a change to the data that would move a printed
 number fails loudly.
 
 The audit is a hand-built dataset, and the point of shipping it is that a reader can check it.
-`data/SCHEMA.md` documents the four inclusion rules, every column's vocabulary, and the
+`data/audit_workshop/SCHEMA.md` documents the four inclusion rules, every column's vocabulary, and the
 definitions behind the two binary judgement columns (*potentially contaminated* and *synthetic*).
-`data/evidence.csv` carries one row per classification -- 497 rows over the 35 papers in the pool
+`data/audit_workshop/evidence.csv` carries one row per classification -- 497 rows over the 35 papers in the pool
 -- each giving the verbatim passage that supports it, with the PDF and page, or, where the claim
 is that a paper never states something, the search protocol that established it. Every quoted
-passage was checked mechanically against the page it cites. `data/RUBRIC.md` reproduces the
+passage was checked mechanically against the page it cites. `data/audit_workshop/RUBRIC.md`
+reproduces the
 instructions the AI readers worked from; the paper's implementation-notes appendix describes the
 process and its limitations.
 

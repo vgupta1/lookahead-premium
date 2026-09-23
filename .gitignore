@@ -13,9 +13,9 @@ outputs/*.log
 __pycache__/
 *.pyc
 
-# Scopus exports: Elsevier's terms restrict redistributing downloaded records,
+# Scopus downloads of any kind: Elsevier's terms restrict redistributing records,
 # and the abstracts are publisher copyright. See data/audit_journal/README.md.
-data/audit_journal/scopus_export_*.csv
+data/audit_journal/scopus_*.csv
 data/audit_journal/venue_sweep_2026-*.csv
 
 # Hand-review sheets: these quote the abstracts of the records under review
