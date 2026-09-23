@@ -7,7 +7,7 @@
 #
 # LAP_ROOT and LAP_OUT override the repository root and the output directory,
 # so the same scripts can write straight into a paper tree:
-#   make all LAP_OUT=../RegretMetrics_NeuripsWorkshop/figs
+#   make all LAP_OUT=../manuscript_workshop/figs
 
 PY      ?= python3
 CODE    := code
@@ -66,7 +66,7 @@ help:
 # Copy the regenerated exhibits into the paper tree: PDFs to figs/, tabulars to
 # tables/.  The floats, captions and labels live in the .tex files and are not
 # touched.
-PAPER ?= ../RegretMetrics_NeuripsWorkshop
+PAPER ?= ../manuscript_workshop
 paper: all
 	cp $(OUT)/*.pdf $(PAPER)/figs/
 	cp $(OUT)/*.tex $(PAPER)/tables/

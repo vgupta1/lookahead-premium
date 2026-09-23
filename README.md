@@ -56,7 +56,7 @@ rebuild; the generated file is the numbers only. `make paper` copies the rebuilt
 the paper tree — PDFs to `figs/`, tabulars to `tables/`:
 
 ```bash
-make paper PAPER=/path/to/RegretMetrics_NeuripsWorkshop
+make paper PAPER=/path/to/manuscript_workshop
 ```
 
 `LAP_OUT` relocates the output directory and `LAP_ROOT` the data and cache directories; both
