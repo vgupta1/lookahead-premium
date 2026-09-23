@@ -27,6 +27,7 @@ Works cited by both surveys: 38 (31 title matches + 7 dup_of links across survey
 """
 import csv, os
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
 SRC, OUT = "seed_frame_2026-09-10.csv", "seed_frame_2026-09-21.csv"
 
 TITLE_FIX = {"SF0081": "Implicit functions and solution mappings: A view from variational analysis"}
@@ -56,7 +57,7 @@ DUP = [
     ("SF0294", "SF0293", "Wilder et al. AAAI 2019: 'Decisionfocused' vs 'Decision-focused'"),
 ]
 
-rows = list(csv.DictReader(open(os.path.join(HERE, SRC), encoding="utf-8")))
+rows = list(csv.DictReader(open(os.path.join(DATA, SRC), encoding="utf-8")))
 assert len(rows) == 311
 for r in rows:
     r["dup_of"], r["repair_note"] = "", ""
@@ -87,7 +88,7 @@ jw = sum("J" in w for w in works.values()); sw = sum("S" in w for w in works.val
 assert (jw, sw) == (153, 190), (jw, sw)   # EJOR prints El Balghiti twice
 
 cols = ["frame_id", "title", "year", "first_author", "in_jair", "in_sadana", "dup_of", "repair_note", "full_entry"]
-with open(os.path.join(HERE, OUT), "w", newline="", encoding="utf-8") as f:
+with open(os.path.join(DATA, OUT), "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(rows)
 print(f"{OUT}: {len(rows)} entries (JAIR {J}, EJOR {S}, title-matched in both {title_both}); "
       f"{len(works)} distinct works (JAIR {jw}, EJOR {sw}, both {both})")

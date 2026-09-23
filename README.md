@@ -73,6 +73,8 @@ code/
   literature_audit.py         Table 1, from data/audit_workshop/audit.csv
   aggregation_example.py      Example 1 and the reversal frequencies
   aggregation_reversal.py     reversal on the E&G shortest-path generator
+  audit_journal/              the journal version's audit pipeline: frame repair,
+                              venue sweep, the two LLM screens, the audit list
 data/
   eg/                         Elmachtoub & Grigas's published replication results
   audit_workshop/             the workshop paper's literature audit: audit.csv,

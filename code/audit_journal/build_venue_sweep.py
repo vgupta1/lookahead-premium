@@ -45,6 +45,7 @@ import csv, re, sys, glob, unicodedata, collections, datetime, os
 
 csv.field_size_limit(10**9)
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
 DATE = "2026-09-16"          # date of the Scopus export of record
 BUILD_DATE = "2026-09-21"    # date of this build; names the outputs
 SEED_FRAME = "seed_frame_2026-09-21.csv"
@@ -147,7 +148,7 @@ def get(row, key):
 RECORD_EXPORT = "scopus_export_2026-09-16_v5.csv"
 
 def load_export():
-    p = os.path.join(HERE, RECORD_EXPORT)
+    p = os.path.join(DATA, RECORD_EXPORT)
     if not os.path.exists(p):
         sys.exit(f"Scopus export of record not found:\n  {p}\n\n"
                  "It is deliberately not distributed with this repository (Elsevier's terms\n"
@@ -171,7 +172,7 @@ def main():
 
     # seed frame, for the frame_id join and the validation
     seed = []
-    sp = os.path.join(HERE, SEED_FRAME)
+    sp = os.path.join(DATA, SEED_FRAME)
     if os.path.exists(sp):
         with open(sp, encoding="utf-8-sig", newline="") as f:
             seed = list(csv.DictReader(f))
@@ -209,13 +210,13 @@ def main():
             source_title=get(r, "Source title"), conference_name=get(r, "Conference name"),
             doc_type=get(r, "Document Type"), eid=get(r, "EID")))
 
-    outp = os.path.join(HERE, f"venue_sweep_{BUILD_DATE}.csv")
+    outp = os.path.join(DATA, f"venue_sweep_{BUILD_DATE}.csv")
     cols = ["sweep_id","venue","year","title","authors","abstract","url","doi",
             "matched_keywords","frame_id","frame_link","author_keywords","index_keywords",
             "source_title","conference_name","doc_type","eid"]
     with open(outp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(out)
-    kp = os.path.join(HERE, f"venue_sweep_keys_{BUILD_DATE}.csv")
+    kp = os.path.join(DATA, f"venue_sweep_keys_{BUILD_DATE}.csv")
     kcols = ["sweep_id","venue","year","title","authors","doi","url","frame_id","frame_link",
              "source_title","conference_name","doc_type","eid"]
     with open(kp, "w", newline="", encoding="utf-8") as f:
@@ -273,7 +274,7 @@ def main():
                f"known 2023 papers at the eleven venues : {tot}",
                f"recovered by the sweep                 : {rec}  ({rec/tot:.0%})" if tot else "",
                f"missed                                 : {tot-rec}", ""] + lines)
-    vp = os.path.join(HERE, f"validation_{BUILD_DATE}.txt")
+    vp = os.path.join(DATA, f"validation_{BUILD_DATE}.txt")
     open(vp, "w", encoding="utf-8").write("\n".join(report) + "\n")
     print("\n" + "\n".join(report))
     print(f"\nwrote {vp}")

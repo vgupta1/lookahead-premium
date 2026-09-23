@@ -51,6 +51,7 @@ TEMPERATURE = 0
 RUNS = 3
 DATE = "2026-09-22"          # names the outputs; the frame it reads is dated separately
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
 FRAME = "seed_frame_2026-09-21.csv"
 SEED_SELF = {"SF0185": "the JAIR seed survey itself (arXiv version, cited by EJOR)",
              "SF0243": "the EJOR seed survey itself (cited by JAIR)"}
@@ -196,7 +197,7 @@ def check_control_disjoint(works):
 
 
 def load_works():
-    rows = list(csv.DictReader(open(os.path.join(HERE, FRAME), encoding="utf-8")))
+    rows = list(csv.DictReader(open(os.path.join(DATA, FRAME), encoding="utf-8")))
     assert len(rows) == 313, len(rows)
     works = collections.OrderedDict()
     for r in rows:
@@ -255,7 +256,7 @@ def load_cache(model, fresh=False):
     """Votes already obtained, as {(frame_id, run_index): vote}. Only votes cast under the CURRENT
     prompt hash and model are reused; anything else is ignored, so a prompt edit cannot silently
     mix two specifications in one output."""
-    p = os.path.join(HERE, CACHE)
+    p = os.path.join(DATA, CACHE)
     if fresh or not os.path.exists(p):
         return {}
     out = {}
@@ -273,7 +274,7 @@ def load_cache(model, fresh=False):
 
 
 def cache_put(fid, run_i, vote, model):
-    with open(os.path.join(HERE, CACHE), "a", encoding="utf-8") as f:
+    with open(os.path.join(DATA, CACHE), "a", encoding="utf-8") as f:
         f.write(json.dumps({"frame_id": fid, "run": run_i, "prompt_hash": PROMPT_HASH,
                             "model": model, "at": datetime.datetime.now().isoformat(timespec="seconds"),
                             "vote": vote}) + "\n")
@@ -297,7 +298,7 @@ def validate(key, works, model=MODEL):
            f"{len(CONTROL_NEG)} obvious background must be BACKGROUND)", ""] + lines
     for fid, want, v in fails:
         out.append(f"FAIL {fid} [{want}] -> {v['bucket']}: {v['reason']}")
-    open(os.path.join(HERE, "seed_screen_validation.txt"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(DATA, "seed_screen_validation.txt"), "w").write("\n".join(out) + "\n")
     print("\n" + "\n".join(out[:3]))
     return not fails
 
@@ -343,7 +344,7 @@ def run(key, rows, works, model=MODEL, k=RUNS, fresh=False):
                         year=r["year"], model_id=model if L["method"] == "llm" else "",
                         runs=k if L["method"] == "llm" else "",
                         prompt_hash=PROMPT_HASH if L["method"] == "llm" else "", run_date=today))
-    p = os.path.join(HERE, f"seed_screen_{DATE}.csv")
+    p = os.path.join(DATA, f"seed_screen_{DATE}.csv")
     with open(p, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(out[0].keys())); w.writeheader(); w.writerows(out)
 
@@ -362,7 +363,7 @@ def run(key, rows, works, model=MODEL, k=RUNS, fresh=False):
                             vg_ruling="", vg_note=""))
     order = {"BORDERLINE": 0, "CANDIDATE": 1, "BACKGROUND": 2}
     rev.sort(key=lambda r: (order[r["machine_bucket"]], r["frame_id"]))
-    rp = os.path.join(HERE, f"seed_screen_review_{DATE}.csv")
+    rp = os.path.join(DATA, f"seed_screen_review_{DATE}.csv")
     with open(rp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rev[0].keys())); w.writeheader(); w.writerows(rev)
 

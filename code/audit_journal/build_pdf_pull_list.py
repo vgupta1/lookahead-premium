@@ -3,14 +3,18 @@
 One row per CANDIDATE record, sorted by venue then year, carrying everything needed to find the
 paper plus the blank columns that become corpus.bib fields (search_protocol.md section 5).
 
-Run from data/audit_journal/.
+Reads and writes data/audit_journal/; run from anywhere.
 """
 import csv, re
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+D = lambda n: os.path.join(DATA, n)
 
 DATE, OUT = "2026-09-16", "pdf_pull_list_2026-09-19.csv"
 
-sweep = {r["sweep_id"]: r for r in csv.DictReader(open(f"venue_sweep_{DATE}.csv"))}
-cands = [r for r in csv.DictReader(open(f"triage_final_{DATE}.csv"))
+sweep = {r["sweep_id"]: r for r in csv.DictReader(open(D(f"venue_sweep_{DATE}.csv")))}
+cands = [r for r in csv.DictReader(open(D(f"triage_final_{DATE}.csv")))
          if r["final_bucket"] == "CANDIDATE"]
 cands.sort(key=lambda r: (r["venue"], r["year"], r["sweep_id"]))
 
@@ -23,7 +27,7 @@ cols = ["sweep_id", "venue", "year", "first_author", "title", "doi", "url", "eid
         "bibkey_prefix", "bibkey", "pdf_filename", "source_type", "version", "urldate",
         "appendix", "appendixfile", "notes"]
 
-with open(OUT, "w", newline="") as f:
+with open(D(OUT), "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=cols)
     w.writeheader()
     for r in cands:

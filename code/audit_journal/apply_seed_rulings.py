@@ -17,13 +17,14 @@ import csv, os, collections
 
 DATE = "2026-09-22"
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
 FRAME = "seed_frame_2026-09-21.csv"
 SCREEN, REVIEW = f"seed_screen_{DATE}.csv", f"seed_screen_review_{DATE}.csv"
 OUT = f"seed_screen_final_{DATE}.csv"
 
-frame = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(HERE, FRAME), encoding="utf-8"))}
-scr = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(HERE, SCREEN), encoding="utf-8"))}
-rev = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(HERE, REVIEW), encoding="utf-8"))}
+frame = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(DATA, FRAME), encoding="utf-8"))}
+scr = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(DATA, SCREEN), encoding="utf-8"))}
+rev = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(DATA, REVIEW), encoding="utf-8"))}
 
 unruled = [f for f, r in rev.items()
            if r["machine_bucket"] == "BORDERLINE" and not (r["vg_ruling"] or "").strip()]
@@ -50,7 +51,7 @@ for fid, r in scr.items():
         agreement=r["agreement"], title=r["title"], year=r["year"],
         model_id=r["model_id"], prompt_hash=r["prompt_hash"], run_date=r["run_date"]))
 
-with open(os.path.join(HERE, OUT), "w", newline="", encoding="utf-8") as f:
+with open(os.path.join(DATA, OUT), "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=list(out[0].keys())); w.writeheader(); w.writerows(out)
 
 works = [o for o in out if o["frame_id"] == o["canonical_id"]]

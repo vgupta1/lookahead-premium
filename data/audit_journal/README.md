@@ -52,14 +52,14 @@ To reproduce our result exactly rather than refresh it, filter the export to the
 
 **2. Build the sweep table.**
 
-    python3 build_venue_sweep.py
+    python3 ../../code/audit_journal/build_venue_sweep.py
 
 Reads that one export, assigns venues, applies the 2023–2026 window, joins `frame_id` from
 `seed_frame_2026-09-21.csv`, and writes `venue_sweep_<BUILD_DATE>.csv` (379 rows, 28 linked to the
 seed frame), the shareable `venue_sweep_keys_<BUILD_DATE>.csv`, and `validation_<BUILD_DATE>.txt`,
 the search-recall check against the 2023 overlap year (14/19).
 
-The seed frame itself is produced by `python3 repair_seed_frame.py` from `seed_frame_2026-09-10.csv`
+The seed frame itself is produced by `python3 ../../code/audit_journal/repair_seed_frame.py` from `seed_frame_2026-09-10.csv`
 (the original PDF parse). **Rebuilt 2026-09-21:** the earlier join matched on a space-preserving
 title only, left four in-frame sweep records unlinked, and scored the recall check 13/19. The
 triage run and everything downstream of it (`triage_*_2026-09-16.csv`, the Phase 2 files, the pull
@@ -76,8 +76,8 @@ whole venue-years if you get them wrong.
 **3. Run the triage screen.**
 
     export ANTHROPIC_API_KEY=...
-    python3 triage_screen.py --validate     # 12 calls; must print 12/12
-    python3 triage_screen.py --run          # ~379 calls, roughly $2
+    python3 ../../code/audit_journal/triage_screen.py --validate   # 12 calls; must print 12/12
+    python3 ../../code/audit_journal/triage_screen.py --run        # ~379 calls, roughly $2
 
 `--run` re-runs the control set first and aborts if it fails. Output is `triage_<DATE>.csv` with a
 bucket, the model's own one-sentence rationale, a confidence, the model id, a prompt hash and the run
@@ -91,6 +91,10 @@ set runs on every execution. Expect near-identical, not bit-identical, output.
 ---
 
 ## Files
+
+**The scripts moved to `code/audit_journal/` on 2026-09-23** — a referee expects code under
+`code/` and data under `data/`. Each resolves this directory from its own location, so they run
+from anywhere. Everything else below is in this directory.
 
 | File | What it is |
 |---|---|

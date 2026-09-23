@@ -32,6 +32,7 @@ TEMPERATURE = 0
 RUNS = 3                  # k-run majority vote; override with --runs
 DATE = "2026-09-16"
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
 
 PROMPT = """You are screening papers for a literature audit of *contextual optimization* -- settings \
 where an optimization problem must be solved but some of its parameters are not known and are \
@@ -145,7 +146,7 @@ def validate(key, model=MODEL):
     re-parsed from PDFs, which is not reproducible). The four marked difficulty='narrow' carry no
     prediction language at all and are the binding test -- an earlier rule that asked whether a
     parameter is predicted excluded all four."""
-    recs = json.load(open(os.path.join(HERE, "triage_control_abstracts.json"),
+    recs = json.load(open(os.path.join(DATA, "triage_control_abstracts.json"),
                           encoding="utf-8"))["records"]
     fails = []
     for r in recs:
@@ -160,7 +161,7 @@ def validate(key, model=MODEL):
            f"{len(recs)-len(fails)}/{len(recs)} passed"]
     for r, v in fails:
         out.append(f"FAIL {r['bibkey']} [{r['difficulty']}] -> {v['bucket']}: {v['reason']}")
-    open(os.path.join(HERE, "triage_validation.txt"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(DATA, "triage_validation.txt"), "w").write("\n".join(out) + "\n")
     print("\n" + "\n".join(out))
     return not fails
 
@@ -177,7 +178,7 @@ def run(key, model=MODEL, k=RUNS):
     ruling, and the count of them is itself reportable. `agreement` records how many of the k runs
     backed the winning bucket; `buckets_all` keeps the raw votes.
     """
-    src = os.path.join(HERE, SWEEP_FILE)
+    src = os.path.join(DATA, SWEEP_FILE)
     if not os.path.exists(src):
         sys.exit(f"sweep table not found: {src}\nRun build_venue_sweep.py first.")
     rows = list(csv.DictReader(open(src, encoding="utf-8-sig", newline="")))
@@ -206,7 +207,7 @@ def run(key, model=MODEL, k=RUNS):
         if i % 25 == 0:
             print(f"  {i}/{len(rows)}")
 
-    p = os.path.join(HERE, f"triage_{DATE}.csv")
+    p = os.path.join(DATA, f"triage_{DATE}.csv")
     with open(p, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(out[0].keys())); w.writeheader(); w.writerows(out)
     print("\n" + str(collections.Counter(o["bucket"] for o in out)))
@@ -238,10 +239,10 @@ def stability(key, n, model=MODEL):
     """
     import random
     prior = {r["sweep_id"]: r for r in
-             csv.DictReader(open(os.path.join(HERE, f"triage_{DATE}.csv"),
+             csv.DictReader(open(os.path.join(DATA, f"triage_{DATE}.csv"),
                                  encoding="utf-8-sig", newline=""))}
     rows = {r["sweep_id"]: r for r in
-            csv.DictReader(open(os.path.join(HERE, SWEEP_FILE),
+            csv.DictReader(open(os.path.join(DATA, SWEEP_FILE),
                                 encoding="utf-8-sig", newline=""))}
     random.seed(20260917)
     ids = random.sample(sorted(set(prior) & set(rows)), min(n, len(prior)))
@@ -264,7 +265,7 @@ def stability(key, n, model=MODEL):
         print("\n  bucket disagreements:")
         for s, x, y, t in flips:
             print(f"    {s} {x} -> {y}  {t}")
-    open(os.path.join(HERE, "triage_stability.txt"), "w").write(
+    open(os.path.join(DATA, "triage_stability.txt"), "w").write(
         f"prompt_hash={PROMPT_HASH} model={MODEL} temperature={TEMPERATURE} n={len(ids)}\n"
         f"bucket agreement {agree_b}/{len(ids)}; identical rationale {agree_r}/{len(ids)}\n"
         + "".join(f"{s} {x} -> {y} {t}\n" for s, x, y, t in flips))

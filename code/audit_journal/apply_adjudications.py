@@ -5,18 +5,22 @@ triage_adjudications_2026-09-16.csv and are applied here to produce triage_final
 which is the corpus that Gate A / Gate B and the Phase 2 sample draw from.
 """
 import csv
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+D = lambda n: os.path.join(DATA, n)
 
 DATE = "2026-09-16"
 RUN  = f"triage_{DATE}.csv"
 ADJ  = f"triage_adjudications_{DATE}.csv"
 OUT  = f"triage_final_{DATE}.csv"
 
-adj = {r["sweep_id"]: r for r in csv.DictReader(open(ADJ))}
-rows = list(csv.DictReader(open(RUN)))
+adj = {r["sweep_id"]: r for r in csv.DictReader(open(D(ADJ)))}
+rows = list(csv.DictReader(open(D(RUN))))
 
 fields = list(rows[0].keys()) + ["final_bucket", "adjudicated", "adjudication_note"]
 changed = 0
-with open(OUT, "w", newline="") as f:
+with open(D(OUT), "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=fields)
     w.writeheader()
     for r in rows:

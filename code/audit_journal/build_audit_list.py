@@ -24,6 +24,7 @@ import csv, os, re, collections
 
 DATE = "2026-09-22"
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
 OUT = f"audit_list_{DATE}.csv"
 
 # Files in papers/ verified 2026-09-22 to be the version of record (no arXiv stamp, publisher
@@ -59,7 +60,7 @@ def check_titles(fid, title, entry):
                          "  add the printed title to TITLE_FIX with a one-line reason.")
     return title
 
-rd = lambda n: list(csv.DictReader(open(os.path.join(HERE, n), encoding="utf-8-sig")))
+rd = lambda n: list(csv.DictReader(open(os.path.join(DATA, n), encoding="utf-8-sig")))
 tri = {r["sweep_id"]: r for r in rd("triage_final_2026-09-16.csv")}
 keys = {r["sweep_id"]: r for r in rd("venue_sweep_keys_2026-09-21.csv")}
 seedf = {r["frame_id"]: r for r in rd("seed_frame_2026-09-21.csv")}
@@ -120,7 +121,7 @@ for r in rows:
     r.update({c: "" for c in blank})
 cols = ["source", "sweep_id", "frame_id", "first_author", "year", "venue", "title", "doi", "url",
         "eid", "seed_bucket", "have_official", "reference", "bibkey_prefix"] + blank
-with open(os.path.join(HERE, OUT), "w", newline="", encoding="utf-8") as f:
+with open(os.path.join(DATA, OUT), "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(rows)
 
 C = collections.Counter(r["source"] for r in rows)

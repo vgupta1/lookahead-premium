@@ -14,9 +14,10 @@ import csv, os, re
 
 DATE = "2026-09-22"
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
 CHUNK, TITLE_WORDS = 25, 12
 
-rows = [r for r in csv.DictReader(open(os.path.join(HERE, f"audit_list_{DATE}.csv"), encoding="utf-8"))
+rows = [r for r in csv.DictReader(open(os.path.join(DATA, f"audit_list_{DATE}.csv"), encoding="utf-8"))
         if not r["doi"].strip() and r["source"] == "seed"]
 
 def clean(t):
@@ -36,7 +37,7 @@ for i in range(0, len(rows), CHUNK):
     q = " OR ".join(f'TITLE("{clean(r["title"])}")' for r in blk)
     out += [f"--- block {i//CHUNK + 1} of {(len(rows)+CHUNK-1)//CHUNK}  "
             f"({blk[0]['frame_id']}-{blk[-1]['frame_id']}, {len(blk)} titles) ---", q, ""]
-p = os.path.join(HERE, f"seed_doi_queries_{DATE}.txt")
+p = os.path.join(DATA, f"seed_doi_queries_{DATE}.txt")
 open(p, "w", encoding="utf-8").write("\n".join(out) + "\n")
 blocks = [(len(b) - 1) for b in [out]]
 qlens = [len(l) for l in out if l.startswith("TITLE(")]

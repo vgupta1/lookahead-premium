@@ -4,17 +4,21 @@ Claim backed by this script: the rule-2a prompt revision moved 15 of the 379 rec
 lie on the boundary that revision redrew rather than being scattered drift. Also reports the
 model-choice comparison (final Sonnet run vs the Opus run of record).
 
-Run from data/audit_journal/. Prints a table; writes nothing.
+Reads data/audit_journal/; run from anywhere. Prints a table; writes nothing.
 """
 import csv
 from collections import Counter
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+D = lambda n: os.path.join(DATA, n)
 
 PRE   = "triage_2026-09-16_prompt6cdbe5801fa3.csv"       # sonnet, prompt BEFORE rule 2a
 POST  = "triage_2026-09-16_sonnet_prompt4bc0e50d09eb.csv" # sonnet, prompt AFTER rule 2a
 FINAL = "triage_2026-09-16.csv"                           # opus, post-2a prompt, run of record
 
 def load(path):
-    return {r["sweep_id"]: r for r in csv.DictReader(open(path))}
+    return {r["sweep_id"]: r for r in csv.DictReader(open(D(path)))}
 
 def diff(a, b, label):
     flips = [(k, a[k]["bucket"], b[k]["bucket"], a[k]["title"][:60], b[k]["reason"][:120])

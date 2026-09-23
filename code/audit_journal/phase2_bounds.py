@@ -5,17 +5,21 @@ information. The sample is a substantial fraction of a finite population (50 of 
 hypergeometric bound is the one reported; the Clopper-Pearson bound is printed alongside because it
 is what a reader expects to see, and it is looser.
 
-Run from data/audit_journal/.
+Reads and writes data/audit_journal/; run from anywhere.
 """
 import csv
 from math import comb
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+D = lambda n: os.path.join(DATA, n)
 
 FINAL    = "triage_final_2026-09-16.csv"
 VERDICTS = "phase2_verdicts_2026-09-19.csv"
 CONF     = 0.95
 
-final = list(csv.DictReader(open(FINAL)))
-verd  = list(csv.DictReader(open(VERDICTS)))
+final = list(csv.DictReader(open(D(FINAL))))
+verd  = list(csv.DictReader(open(D(VERDICTS))))
 
 N = sum(1 for r in final if r["final_bucket"] == "OUT")   # population of excluded records
 n = len(verd)                                             # sample size
