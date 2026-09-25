@@ -104,6 +104,44 @@ DOI; their results (`scopus_doi_lookup_*`) are gitignored like every other raw S
 DOIs back into `papers_to_obtain_*`, so that file still shows those rows as lacking a DOI. Doing the
 merge is outstanding work on the audit, not part of the tidy-up.
 
+## Every file, in one place
+
+Files marked *(not committed)* are on disk but kept out of the repository, for the reasons
+in "What is deliberately not in this repository" below.
+
+```
+01_search/
+    scopus_export_2026-09-16.csv                      the raw Scopus download   (not committed)
+    survey_refs.csv                                   what the two surveys cite: 313 entries, 305 works
+    venue_papers_no_abstracts_2026-09-21.csv          what the search found at the eleven venues
+    venue_papers_with_abstracts_2026-09-21.csv        the same, with abstracts   (not committed)
+    venue_papers_with_abstracts_2026-09-16.csv        the 09-16 run of the same  (not committed)
+    known_2023_papers_found.txt                       which known-relevant papers the query recovered
+02_screen/
+    venue_papers_llm_labels_2026-09-16.csv            the model's three votes per venue paper
+    venue_papers_vg_rulings_2026-09-16.csv            VG's rulings where he overrode the model
+    venue_papers_labels_merged_2026-09-16.csv         the two above, merged: the labels of record
+    survey_refs_llm_labels_2026-09-22.csv             the same three files for the survey references
+    survey_refs_vg_rulings_2026-09-22.csv
+    survey_refs_labels_merged_2026-09-22.csv
+    _cache/survey_refs_model_votes_2026-09-22.jsonl   resume cache, raw calls    (not committed)
+03_screen_accuracy/
+    venue_control_known_papers.json                   the twelve control abstracts
+    venue_control_result.txt                          how the screen scored on them
+    survey_control_result.txt                         the same for the survey screen
+    venue_repeat_run_agreement.txt                    same prompt run twice: 100/100 buckets, 76/100 wording
+    venue_human_audit_random_sample_2026-09-18.csv    50 excluded records drawn at random, seed 20260918
+    venue_human_audit_sheet_2026-09-18.md             those 50 with abstracts    (not committed)
+    venue_human_audit_vg_verdicts_2026-09-19.csv      VG's verdict on each of the 50
+    venue_prompt_v1_pre_rule2a.txt                    the first prompt, superseded
+    venue_prompt_tuning_review_verdicts_2026-09-17.md the review that produced rule 2a
+04_retrieve/
+    papers_to_obtain_2026-09-22.csv                   318 papers to obtain, 315 still to get
+    doi_lookup_queries_2026-09-22.txt                 Scopus title queries for rows with no DOI
+    scopus_doi_lookup_2026-09-22_{1..7}.csv           their results              (not committed)
+05_fulltext_review/                                   nothing yet
+```
+
 ## Two prefixes, and what the dates mean
 
 Every file in `01_search` through `04_retrieve` is named for the thing it holds: **`venue_papers_`**

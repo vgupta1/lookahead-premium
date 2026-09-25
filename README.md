@@ -73,13 +73,22 @@ code/
   literature_audit.py         Table 1, from data/audit_workshop/audit.csv
   aggregation_example.py      Example 1 and the reversal frequencies
   aggregation_reversal.py     reversal on the E&G shortest-path generator
-  audit_journal/              the journal version's audit pipeline: frame repair,
-                              venue sweep, the two LLM screens, the audit list
+  audit_journal/              the journal version's audit pipeline, in five steps:
+    01_search/                filter_scopus_to_relevant_venues.py
+    02_screen/                screen_venue_abstracts.py, label_background_refs.py,
+                              merge_vg_rulings_venue_papers.py,
+                              merge_vg_rulings_survey_refs.py
+    03_screen_accuracy/       draw_audit_sample.py,
+                              compute_false_exclusion_bound.py
+    04_retrieve/              build_papers_to_obtain.py,
+                              build_doi_lookup_queries.py
+    05_fulltext_review/       not written yet
 data/
   eg/                         Elmachtoub & Grigas's published replication results
   audit_workshop/             the workshop paper's literature audit: audit.csv,
                               evidence.csv, SCHEMA.md, RUBRIC.md
-  audit_journal/              the journal version's audit: frame, screens, audit list
+  audit_journal/              the journal version's audit, in the same five steps;
+                              every file is listed in data/audit_journal/README.md
   cache/portfolio_eta.csv     the portfolio premium, one row per replication
 outputs/                      everything the paper prints
 tests/                        the reproduction tests

@@ -30,15 +30,20 @@ SP_METHODS = [("SPOplus", r"\textsc{spo+}"), ("LS", "least squares")]
 PF_METHODS = [("SPOplus", r"\textsc{spo+}"), ("LS", "least squares")]
 PF_TAU = 2
 
-# What 15_implementation.tex prints today, for --check.
+# A frozen transcript of what outputs/tab_autopsy.tex prints, so that --check is a tripwire:
+# it recomputes from data/ and data/cache/ and reports anything that has moved.  Resynced
+# 2026-09-25 to the portfolio cache of 2026-08-29.  The portfolio entries below had been left
+# behind by an earlier cache and were reporting drift against a table that was in fact current;
+# the shortest-path entries never moved.  If --check reports drift, decide which side is wrong
+# before touching either -- do not simply repaste the computed numbers here.
 IN_PAPER = {
     "sp_eta": {1: 15.47, 2: 10.45, 4: 6.73, 6: 5.50, 8: 4.93},
-    "pf_eta": {1: 6.13, 4: 7.74, 8: 5.28, 16: 2.38},
+    "pf_eta": {1: 6.12, 4: 7.56, 8: 5.16, 16: 2.43},
     "pf_SPOplus_rep": {1: 6.18, 4: 7.67, 8: 5.23, 16: 2.73},
-    "pf_SPOplus_corr": {1: 0.06, 4: -0.08, 8: -0.05, 16: 0.36},
+    "pf_SPOplus_corr": {1: 0.06, 4: 0.12, 8: 0.07, 16: 0.31},
     "pf_LS_rep": {1: 6.17, 4: 7.68, 8: 5.35, 16: 3.50},
-    "pf_LS_corr": {1: 0.04, 4: -0.07, 8: 0.08, 16: 1.15},
-    "pf_Baseline_corr": {1: 19.76, 4: 14.31, 8: 19.32, 16: 27.12},
+    "pf_LS_corr": {1: 0.05, 4: 0.13, 8: 0.20, 16: 1.10},
+    "pf_Baseline_corr": {1: 19.76, 4: 14.48, 8: 19.42, 16: 27.08},
 }
 
 

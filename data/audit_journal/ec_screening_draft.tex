@@ -149,9 +149,23 @@ disagreement between the classifier and one reader applying the written rule. It
 the rule is the right one, which is argued in \cref{sec:ECInclusion} rather than estimated, and it is
 not a claim about language-model triage in general: it is a statement about this prompt, at the
 recorded hash, under the recorded model. We have not measured sensitivity to paraphrases of the
-prompt that preserve the rule, and the choice of model is not innocuous -- an earlier execution under
-a smaller model of the same family differed on \(23\) of the \(379\) records, retaining fewer of
-them. Perhaps the most honest statement is that this stage is designed so that its failures are
-recoverable, not so that it is correct: every subsequent stage of the audit works from full texts,
-and the screening log records a ground for each exclusion so that a reader may disagree with any of
-them individually.
+prompt that preserve the rule. We did pilot the rule against a smaller model of the same family
+before pinning the one above, and that pilot is worth reporting. Under the identical frozen prompt
+the smaller model differed on \(23\) of the \(379\) records, \(17\) of them exclusions the pinned
+model did not make, and its own stated grounds say what went wrong: in thirteen of the seventeen it
+recorded that no optimization or decision problem was the object of the work, in papers where the
+optimization plainly is the object -- Bayesian optimization, model predictive control, inverse
+optimization, performative prediction, learned optimal transport. This is the failure the revision
+described above was written against, reappearing under the revised wording that was meant to close
+it: the requirement of a learned component was again being read as a requirement that problem
+\emph{data} be predicted, so an optimization that is itself the object of the work registered as
+machinery for something else. The smaller model passed the control set, \(12/12\), under the prompt
+against which it was piloted, and we do not report that as evidence in its favour: a model can pass
+a twelve-paper control set and still misread the rule at the boundary in the way just described.
+The control set is a floor -- it catches a model that has stopped recognizing the papers this stage
+exists to protect -- and not a test of whether a model applies the rule where the rule is hard. That
+is why the identifier is pinned rather than merely validated, and why every count reported here is
+tied to a fixed identifier and a fixed prompt hash. Perhaps the most honest statement is that
+this stage is designed so that its failures are recoverable, not so that it is correct: every
+subsequent stage of the audit works from full texts, and the screening log records a ground for
+each exclusion so that a reader may disagree with any of them individually.
