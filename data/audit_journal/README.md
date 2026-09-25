@@ -1,129 +1,139 @@
-# Journal-version literature audit — the frame
+# The journal audit's data
 
-Piece 1 of the journal version: the sampling frame and the stage-1 screen. The protocol this
-implements is `notes/journal_audit_protocol.md`, in the project folder outside this repository.
+One folder per step of the pipeline. The scripts live under `code/audit_journal/` in folders with
+the same names, and each resolves this directory from its own location, so they run from anywhere.
+The protocol they implement is `notes/journal_audit_protocol.md`, in the project folder outside this
+repository.
 
-**This directory is the *new* audit. Nothing in `../` is touched.** The workshop-version audit
-(`../audit.csv`, `../evidence.csv`, `../SCHEMA.md`, `../RUBRIC.md`,
-`../../code/literature_audit.py`) must remain byte-identical so the published workshop results stay
-reproducible. Read from those files; never edit them.
+**This is the *new* audit. Nothing in `../audit_workshop/` is touched** — those files back the
+published workshop paper and must stay byte-identical, which the tag `workshop-submission`
+guarantees.
 
----
+    01_search/            where the candidate papers came from
+    02_screen/            deciding which ones to read in full
+    03_screen_accuracy/   evidence that the screen did not throw away what it should have kept
+    04_retrieve/          the list of papers to obtain
+    05_fulltext_review/   (empty) the inclusion gates and extraction, still to be built
 
-## What is not in this repository, and why
+## 01_search
 
-**The raw Scopus exports are not distributed here.** Elsevier's terms restrict redistribution of
-downloaded records, and the abstracts in them are publisher copyright. What is committed instead is
-`venue_sweep_keys_2026-09-21.csv`: every record's Scopus **EID**, DOI where one exists, title,
-authors, venue and year, plus our own `sweep_id` and `frame_id`. Anyone with Scopus access can
-recover the exact record set from the EIDs, or re-run the query below and compare.
-
-Two deliberate exceptions, both small and both necessary to check the method rather than to
-redistribute a database:
-
-- `triage_control_abstracts.json` holds the abstracts of **twelve** papers, quoted so that the
-  control set is reproducible. Without them, the one validation that matters cannot be re-run.
-- `triage_<DATE>.csv` records our own classifications and rationales. That is our output, not
-  Elsevier's.
-
-**The hand-review sheets are not distributed either.** `phase2_sheet_<DATE>.md`,
-`triage_phase1_review.md` and `triage_split_adjudication.md` reproduce the abstract of every
-record under review, so they are gitignored and stay local. What they produced is committed:
-`triage_adjudications_<DATE>.csv`, `phase2_verdicts_<DATE>.csv` and
-`seed_screen_review_<DATE>.csv` carry the rulings, with the reasons but not the abstracts.
-
-Also absent: the superseded query-development exports (v1–v4). They are archived outside the
-repository, and no code reads them — `build_venue_sweep.py` opens one named file.
-
----
-
-## Reproducing the frame
-
-**1. Obtain the Scopus export.** In Scopus Advanced Search, run the query in
-`journal_audit_protocol.md` §5A.3 verbatim. It returned 829 records on 2026-09-16; a later run will return
-more, since the venues keep publishing. Export to CSV including **Abstract, Source title, Conference
-name, DOI, Link, Document Type, EID, Author Keywords** and **Index Keywords**, and save it in this
-directory as
-
-    scopus_export_2026-09-16_v5.csv
-
-To reproduce our result exactly rather than refresh it, filter the export to the EIDs in
-`venue_sweep_keys_2026-09-21.csv` before proceeding.
-
-**2. Build the sweep table.**
-
-    python3 ../../code/audit_journal/build_venue_sweep.py
-
-Reads that one export, assigns venues, applies the 2023–2026 window, joins `frame_id` from
-`seed_frame_2026-09-21.csv`, and writes `venue_sweep_<BUILD_DATE>.csv` (379 rows, 28 linked to the
-seed frame), the shareable `venue_sweep_keys_<BUILD_DATE>.csv`, and `validation_<BUILD_DATE>.txt`,
-the search-recall check against the 2023 overlap year (14/19).
-
-The seed frame itself is produced by `python3 ../../code/audit_journal/repair_seed_frame.py` from `seed_frame_2026-09-10.csv`
-(the original PDF parse). **Rebuilt 2026-09-21:** the earlier join matched on a space-preserving
-title only, left four in-frame sweep records unlinked, and scored the recall check 13/19. The
-triage run and everything downstream of it (`triage_*_2026-09-16.csv`, the Phase 2 files, the pull
-list) were built on the 2026-09-16 sweep table and are unchanged, since the triage prompt never sees
-`frame_id`; **their `frame_id` column is the stale 24-link version — take links from
-`venue_sweep_keys_2026-09-21.csv`.**
-
-The venue assignment is done here in code rather than in the Scopus query, deliberately: the
-`SRCTITLE` clauses are loose, and several venues need the `Conference name` field to be identified
-at all. `journal_audit_protocol.md` §5A.5 lists the eight indexing quirks encoded in the mapping — AAAI
-2023's ordinal source title and ICML/AISTATS sharing one PMLR title are the two that silently drop
-whole venue-years if you get them wrong.
-
-**3. Run the triage screen.**
-
-    export ANTHROPIC_API_KEY=...
-    python3 ../../code/audit_journal/triage_screen.py --validate   # 12 calls; must print 12/12
-    python3 ../../code/audit_journal/triage_screen.py --run        # ~379 calls, roughly $2
-
-`--run` re-runs the control set first and aborts if it fails. Output is `triage_<DATE>.csv` with a
-bucket, the model's own one-sentence rationale, a confidence, the model id, a prompt hash and the run
-date for every record.
-
-**On determinism.** Decoding is greedy (`temperature=0`), which sharply reduces run-to-run variation
-but does not eliminate it: floating-point non-determinism and provider-side model revisions can move
-a borderline record. This is why the prompt hash and model id are stored per row, and why the control
-set runs on every execution. Expect near-identical, not bit-identical, output.
-
----
-
-## Files
-
-**The scripts moved to `code/audit_journal/` on 2026-09-23** — a referee expects code under
-`code/` and data under `data/`. Each resolves this directory from its own location, so they run
-from anywhere. Everything else below is in this directory.
+Two independent sources of candidates.
 
 | File | What it is |
 |---|---|
-| `repair_seed_frame.py` | Original parse → repaired seed frame (restored entries, `dup_of`) |
-| `build_venue_sweep.py` | Export → sweep table, plus the search-recall validation |
-| `triage_screen.py` | Stage-1 topic triage; the prompt *is* the method and lives in this file |
-| `seed_screen.py` | Coarse screen of the seed-survey references (CANDIDATE / BORDERLINE / BACKGROUND); same pinned model, 3-run vote; writes `seed_screen_<DATE>.csv` and the review sheet |
-| `apply_seed_rulings.py` | VG's rulings → `seed_screen_final_<DATE>.csv` (the screen output is never edited) |
-| `build_audit_list.py` | Both screened halves → `audit_list_<DATE>.csv`, one row per paper to obtain |
-| `build_doi_queries.py` | Scopus title queries for the seed-side rows that carry no DOI |
-| `triage_control_abstracts.json` | 12-paper labelled positive control, abstracts verbatim |
-| `seed_frame_2026-09-10.csv` | Original parse, 311 rows — superseded input to `repair_seed_frame.py` |
-| `seed_frame_2026-09-21.csv` | **The frame:** 313 bibliography entries, 305 works (`dup_of`), keyed by `frame_id` |
-| `venue_sweep_keys_2026-09-21.csv` | Shareable record keys for the 379 (no abstracts); links of record |
-| `venue_sweep_keys_2026-09-16.csv` | Same, with the pre-fix `frame_id` join (24 links) — kept because the triage run used it |
-| `venue_sweep_2026-09-21.csv` | Full sweep table *with* abstracts — **gitignored**, local only |
-| `scopus_export_2026-09-16_v5.csv` | Raw export — **gitignored**, local only |
-| `validation_2026-09-21.txt` | Search-recall check: 14 of 19 known 2023 papers recovered |
-| `validation_2026-09-16.txt` | Superseded: 13 of 19, from the pre-fix join |
-| `triage_validation.txt` | Control-set result |
-| `ec_triage_draft.tex` | Draft of the e-companion section describing this stage |
+| `survey_refs.csv` | **An input, not an output.** The 313 references printed in the two survey bibliographies (Mandi JAIR 2024, Sadana EJOR 2025) — 305 distinct works, 38 cited by both. Keyed by `frame_id` (`SF0001`–`SF0313`). |
+| `scopus_export_2026-09-16.csv` | The Scopus search result of record. **Gitignored** — Elsevier restricts redistribution. |
+| `venue_papers_with_abstracts_<DATE>.csv` | 379 papers at the eleven venues, 2023–2026. **Gitignored**: carries Scopus abstracts. |
+| `venue_papers_no_abstracts_<DATE>.csv` | The same rows with the abstracts and keywords stripped — the shareable copy, and **the one source of truth for which papers the surveys already cite**. |
+| `known_2023_papers_found.txt` | Of the 19 works the surveys cite that were published at these venues in 2023, how many the Scopus search returned: **14**. One line per paper, FOUND or MISSED. Rewritten on every build, so it carries no date. |
 
----
+**`survey_refs.csv` cannot be regenerated from this repository.** It was extracted from the two
+survey PDFs outside it, and that extractor was not kept. Ten rows were corrected afterwards — two
+references restored that a parser had swallowed, eight marked as the same work cited twice — and
+every one of those corrections is recorded in the file's own `dup_of` and `repair_note` columns.
+Treat it the way you would treat data someone else published: an input you check, not a product you
+rebuild.
 
-## What this stage does not decide
+## 02_screen
 
-Triage is a retrieval decision: which full texts to obtain. Gates A and B
-(`journal_audit_protocol.md` §2.7) and the four inclusion rules are answered from full text, never from
-abstracts. An earlier design screened Gate A from abstracts and wrongly excluded 4 of the 12 control
-papers, because machine-learning abstracts describe the method and leave the setting to the
-experiments. The prompt now carries two rules whose only purpose is to prevent that failure from
-recurring.
+The screens are deliberately different, because the two sources carry different information.
+
+- **Sweep records** are screened on **title and abstract**, by an LLM under a fixed prompt (the
+  prompt *is* the method), pinned model, temperature 0, three runs with a majority vote.
+- **Survey references** are screened on **the reference string alone** — a bibliography carries no
+  abstract — into CANDIDATE / BORDERLINE / BACKGROUND, deliberately coarse.
+
+Each screen produces three files, and the split is what keeps human judgement visible:
+
+| Suffix | What it is |
+|---|---|
+| `_llm_labels_` | the machine's output, **never edited** — with a reason, a confidence, the prompt hash and the model id per record |
+| `_vg_rulings_` | VG's decisions: on the sweep, the 4 records where the three runs split; on the surveys, a verdict on **all 127** non-candidates |
+| `_labels_final_` | the two merged by a script — what everything downstream reads |
+
+Results: sweep **158 CANDIDATE / 221 OUT**; surveys **186 candidates / 117 background** of 305 works.
+`_cache/` holds the raw per-call model votes so a crashed run resumes without paying twice. **Gitignored:** every record's three votes and the majority reason are already in the committed labels, so the cache is plumbing, not evidence.
+
+**The two sides use different column names for the same things.** Not worth rewriting data that has
+already been ruled on, so here is the translation:
+
+| Means | Venue sweep | Survey references |
+|---|---|---|
+| the record's id | `sweep_id` | `frame_id` |
+| the machine's label | `run_bucket` | `machine_bucket` |
+| VG's label | `vg_bucket` | `vg_ruling` |
+| VG's comment | `note` | `vg_note` |
+| the merged answer | `final_bucket` | `final_bucket` |
+
+`final_bucket` is the one both sides agree on, which is why everything downstream reads only that.
+
+## 03_screen_accuracy
+
+None of this decides anything about a paper. It measures how often a screen was wrong to exclude.
+
+**Two audits, two designs.** The venue side was audited on a **random sample** — 50 of the 221
+excluded records, relabelled by VG with the machine's answers withheld: **0 misses**, so at most
+**11 of 221** were wrongly excluded (95%, one-sided, hypergeometric). The survey side was audited
+**exhaustively** — VG ruled on all 127 non-candidates, and none of the 85 background calls was
+overturned, so no interval is needed. Those rulings live with the screen, in
+`02_screen/survey_refs_vg_rulings_2026-09-22.csv`.
+
+| File | What it shows |
+|---|---|
+| `venue_control_known_papers.json` | The twelve papers the control set is built from: title, abstract, and the answer each must get. A fixture, not a result. |
+| `venue_control_result.txt`, `survey_control_result.txt` | The control sets passing before any real run: **12/12** and **26/26**. Rewritten every `--validate`, so no date. |
+| `venue_human_audit_random_sample_2026-09-18.csv` | The 50 records drawn (seed 20260918). Regenerate the reading sheet with `draw_audit_sample.py`. |
+| `venue_human_audit_vg_verdicts_2026-09-19.csv` | VG's 50 answers. The design, the bounds and the two limits on what they mean are in `notes/journal_audit_protocol.md` §2.7. |
+| `venue_repeat_run_agreement.txt` | Decoding noise, on the model of record: a fresh run agrees with the frozen three-run majority on **100 of 100** buckets, 76 with identical wording. |
+| `venue_prompt_v1_pre_rule2a.txt` | The first prompt (hash `6cdbe5801fa3`), superseded. Kept so the revision is legible; the labels it produced are not kept. |
+| `venue_prompt_tuning_review_verdicts_2026-09-17.md` | The review of that first prompt's exclusions, which produced rule 2a. **Reports no statistic** — targeted, and it drove the revision. |
+
+**What is deliberately not kept.** The full label sets from the superseded prompt and from the
+Sonnet run: a model-versus-model diff has no ground truth in it, and the pipeline's accuracy rests on
+the control set and the human audits, not on either comparison. Both runs are in the git history if
+a referee ever asks.
+
+## 04_retrieve
+
+`papers_to_obtain_<DATE>.csv` — **318 papers to obtain**, 130 found only by the venue search, 160
+cited only by the surveys, 28 by both; three are already held as versions of record, so 315 remain.
+`doi_lookup_queries_<DATE>.txt` holds Scopus title queries for the survey-side rows that carry no
+DOI; their results (`scopus_doi_lookup_*`) are gitignored like every other raw Scopus download.
+
+**Not yet merged.** Seven `scopus_doi_lookup_*` exports are in hand, but nothing has folded their
+DOIs back into `papers_to_obtain_*`, so that file still shows those rows as lacking a DOI. Doing the
+merge is outstanding work on the audit, not part of the tidy-up.
+
+## Two prefixes, and what the dates mean
+
+Every file in `01_search` through `04_retrieve` is named for the thing it holds: **`venue_papers_`**
+(what the Scopus search found at the eleven venues) or **`survey_refs_`** (what the two surveys
+cite). The same two words are used in the scripts, in the protocol and in conversation.
+
+A **date in the name means the file records something that happened once** — a screen run, a draw, a
+set of rulings. **No date means the file is rewritten every time its script runs**, so only the
+current state is meaningful.
+
+**One correction worth knowing about.** The venue labels once carried a `frame_id` column, copied in
+from the sweep table when the screen ran. Four of its cells were wrong — the pre-2026-09-21 join
+linked 24 papers to the surveys where the corrected join links 28 — and nothing read it. The column
+was dropped on 2026-09-25; links come from `venue_papers_no_abstracts_2026-09-21.csv` and nowhere
+else.
+
+## What is deliberately not in this repository
+
+Publisher copyright, not squeamishness: raw Scopus downloads (`scopus_*.csv`), the sweep tables that
+carry abstracts (`*_with_abstracts_*.csv`), and the three hand-review sheets that quote the abstract
+of every record under review (`*_sheet_*.md`). **The rulings those sheets produced are committed** —
+the reasons, not the abstracts. One deliberate exception is tracked: the twelve control-set
+abstracts, without which the control set cannot be re-run.
+
+## Re-running any of it
+
+    python3 code/audit_journal/01_search/filter_scopus_to_relevant_venues.py
+    python3 code/audit_journal/02_screen/screen_venue_abstracts.py --validate   # 12 calls, must print 12/12
+    python3 code/audit_journal/02_screen/screen_venue_abstracts.py --run        # ~379 calls, roughly $2
+    python3 code/audit_journal/04_retrieve/build_papers_to_obtain.py
+
+Decoding is greedy, which sharply reduces run-to-run variation but does not eliminate it: expect
+near-identical, not bit-identical, output from the two screens. Everything else reproduces exactly.

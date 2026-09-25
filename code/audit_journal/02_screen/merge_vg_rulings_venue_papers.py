@@ -1,19 +1,18 @@
-"""Apply recorded human adjudications to a triage run.
+"""merge_vg_rulings_venue_papers.py -- merges VG's hand decisions into the sweep screen's labels.
 
 The run CSV is never modified: it is the machine output of record. Human rulings live in
-triage_adjudications_2026-09-16.csv and are applied here to produce triage_final_2026-09-16.csv,
-which is the corpus that Gate A / Gate B and the Phase 2 sample draw from.
+venue_papers_vg_rulings_2026-09-16.csv and are applied here to produce venue_papers_labels_merged_2026-09-16.csv,
+which is what the blind recheck and everything downstream read.
 """
-import csv
-import os
+import csv, os
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
 D = lambda n: os.path.join(DATA, n)
 
 DATE = "2026-09-16"
-RUN  = f"triage_{DATE}.csv"
-ADJ  = f"triage_adjudications_{DATE}.csv"
-OUT  = f"triage_final_{DATE}.csv"
+RUN  = f"02_screen/venue_papers_llm_labels_{DATE}.csv"
+ADJ  = f"02_screen/venue_papers_vg_rulings_{DATE}.csv"
+OUT  = f"02_screen/venue_papers_labels_merged_{DATE}.csv"
 
 adj = {r["sweep_id"]: r for r in csv.DictReader(open(D(ADJ)))}
 rows = list(csv.DictReader(open(D(RUN))))

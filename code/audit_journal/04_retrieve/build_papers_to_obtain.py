@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-build_audit_list.py -- the two screened halves of the frame -> audit_list_<DATE>.csv
+build_papers_to_obtain.py -- the two screened halves of the candidate list -> papers_to_obtain_<DATE>.csv
 
 One row per PAPER to obtain in full text. Inputs, all of them screening outputs, never edited here:
 
-  triage_final_2026-09-16.csv     venue sweep after triage + adjudications (CANDIDATE = 158)
-  venue_sweep_keys_2026-09-21.csv sweep record keys, incl. the corrected frame_id links
-  seed_screen_final_2026-09-22.csv seed references after the coarse screen + VG's rulings
-  seed_frame_2026-09-21.csv       the frame itself (reference strings, dup_of)
+  venue_papers_labels_merged_2026-09-16.csv     venue sweep after triage + adjudications (CANDIDATE = 158)
+  venue_papers_no_abstracts_2026-09-21.csv sweep record keys, incl. the corrected frame_id links
+  survey_refs_labels_merged_2026-09-22.csv survey references after the coarse screen + VG's rulings
+  01_search/survey_refs.csv       the reference list itself (reference strings, dup_of)
 
 DEDUPLICATION. A paper cited by a seed survey AND found by the sweep is ONE row, carrying both keys.
 The link is the corrected frame_id join (28 sweep records). Seed-side duplicates were already
@@ -24,8 +24,8 @@ import csv, os, re, collections
 
 DATE = "2026-09-22"
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
-OUT = f"audit_list_{DATE}.csv"
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
+OUT = f"04_retrieve/papers_to_obtain_{DATE}.csv"
 
 # Files in papers/ verified 2026-09-22 to be the version of record (no arXiv stamp, publisher
 # furniture present). Everything else in papers/ is an arXiv copy and must be re-obtained.
@@ -61,10 +61,10 @@ def check_titles(fid, title, entry):
     return title
 
 rd = lambda n: list(csv.DictReader(open(os.path.join(DATA, n), encoding="utf-8-sig")))
-tri = {r["sweep_id"]: r for r in rd("triage_final_2026-09-16.csv")}
-keys = {r["sweep_id"]: r for r in rd("venue_sweep_keys_2026-09-21.csv")}
-seedf = {r["frame_id"]: r for r in rd("seed_frame_2026-09-21.csv")}
-seed = {r["frame_id"]: r for r in rd(f"seed_screen_final_{DATE}.csv")}
+tri = {r["sweep_id"]: r for r in rd("02_screen/venue_papers_labels_merged_2026-09-16.csv")}
+keys = {r["sweep_id"]: r for r in rd("01_search/venue_papers_no_abstracts_2026-09-21.csv")}
+seedf = {r["frame_id"]: r for r in rd("01_search/survey_refs.csv")}
+seed = {r["frame_id"]: r for r in rd(f"02_screen/survey_refs_labels_merged_{DATE}.csv")}
 members = collections.defaultdict(list)
 for f, r in seedf.items():
     members[r["dup_of"] or f].append(r)

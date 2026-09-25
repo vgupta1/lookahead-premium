@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-triage_screen.py -- stage-1 topic triage for the journal-version literature audit.
+screen_venue_abstracts.py -- labels each venue-sweep paper from its title and abstract:
+is there a decision or optimization problem, with something learned in the same pipeline?
 
 This is an LLM classifier with a FIXED prompt, not a keyword match. The criterion it applies is an
 interpretive judgement, and such judgements are reproducible only if the prompt, the model and the
@@ -11,10 +12,10 @@ It decides which PDFs to chase. It does NOT decide inclusion -- Gates A and B
 (journal_audit_protocol.md 2.7) and the four inclusion rules all require full text.
 
     export ANTHROPIC_API_KEY=...
-    python3 triage_screen.py --validate     # control set; always run this first
-    python3 triage_screen.py --run          # triage venue_sweep_<DATE>.csv
+    python3 screen_venue_abstracts.py --validate     # control set; always run this first
+    python3 screen_venue_abstracts.py --run          # screen 01_search/venue_papers_with_abstracts_<DATE>.csv
 
-Outputs triage_<DATE>.csv and triage_validation.txt. Needs network, so it does not run in the
+Outputs 02_screen/venue_papers_llm_labels_<DATE>.csv and 03_screen_accuracy/venue_control_result.txt. Needs network, so it does not run in the
 Cowork sandbox.
 """
 
@@ -32,7 +33,7 @@ TEMPERATURE = 0
 RUNS = 3                  # k-run majority vote; override with --runs
 DATE = "2026-09-16"
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
 
 PROMPT = """You are screening papers for a literature audit of *contextual optimization* -- settings \
 where an optimization problem must be solved but some of its parameters are not known and are \
@@ -146,7 +147,7 @@ def validate(key, model=MODEL):
     re-parsed from PDFs, which is not reproducible). The four marked difficulty='narrow' carry no
     prediction language at all and are the binding test -- an earlier rule that asked whether a
     parameter is predicted excluded all four."""
-    recs = json.load(open(os.path.join(DATA, "triage_control_abstracts.json"),
+    recs = json.load(open(os.path.join(DATA, "03_screen_accuracy/venue_control_known_papers.json"),
                           encoding="utf-8"))["records"]
     fails = []
     for r in recs:
@@ -161,12 +162,12 @@ def validate(key, model=MODEL):
            f"{len(recs)-len(fails)}/{len(recs)} passed"]
     for r, v in fails:
         out.append(f"FAIL {r['bibkey']} [{r['difficulty']}] -> {v['bucket']}: {v['reason']}")
-    open(os.path.join(DATA, "triage_validation.txt"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(DATA, "03_screen_accuracy/venue_control_result.txt"), "w").write("\n".join(out) + "\n")
     print("\n" + "\n".join(out))
     return not fails
 
 
-SWEEP_FILE = f"venue_sweep_{DATE}.csv"   # named, not globbed: venue_sweep_keys_*.csv also matches
+SWEEP_FILE = f"01_search/venue_papers_with_abstracts_{DATE}.csv"   # named, not globbed: venue_papers_no_abstracts_*.csv also matches
                                          # a glob and carries no abstracts.
 
 def run(key, model=MODEL, k=RUNS):
@@ -180,7 +181,7 @@ def run(key, model=MODEL, k=RUNS):
     """
     src = os.path.join(DATA, SWEEP_FILE)
     if not os.path.exists(src):
-        sys.exit(f"sweep table not found: {src}\nRun build_venue_sweep.py first.")
+        sys.exit(f"sweep table not found: {src}\nRun 01_search/filter_scopus_to_relevant_venues.py first.")
     rows = list(csv.DictReader(open(src, encoding="utf-8-sig", newline="")))
     if "abstract" not in rows[0]:
         sys.exit(f"{SWEEP_FILE} has no 'abstract' column -- this looks like the keys file, which\n"
@@ -207,7 +208,7 @@ def run(key, model=MODEL, k=RUNS):
         if i % 25 == 0:
             print(f"  {i}/{len(rows)}")
 
-    p = os.path.join(DATA, f"triage_{DATE}.csv")
+    p = os.path.join(DATA, f"02_screen/venue_papers_llm_labels_{DATE}.csv")
     with open(p, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(out[0].keys())); w.writeheader(); w.writerows(out)
     print("\n" + str(collections.Counter(o["bucket"] for o in out)))
@@ -239,7 +240,7 @@ def stability(key, n, model=MODEL):
     """
     import random
     prior = {r["sweep_id"]: r for r in
-             csv.DictReader(open(os.path.join(DATA, f"triage_{DATE}.csv"),
+             csv.DictReader(open(os.path.join(DATA, f"02_screen/venue_papers_llm_labels_{DATE}.csv"),
                                  encoding="utf-8-sig", newline=""))}
     rows = {r["sweep_id"]: r for r in
             csv.DictReader(open(os.path.join(DATA, SWEEP_FILE),
@@ -265,11 +266,11 @@ def stability(key, n, model=MODEL):
         print("\n  bucket disagreements:")
         for s, x, y, t in flips:
             print(f"    {s} {x} -> {y}  {t}")
-    open(os.path.join(DATA, "triage_stability.txt"), "w").write(
+    open(os.path.join(DATA, "03_screen_accuracy/venue_repeat_run_agreement.txt"), "w").write(
         f"prompt_hash={PROMPT_HASH} model={MODEL} temperature={TEMPERATURE} n={len(ids)}\n"
         f"bucket agreement {agree_b}/{len(ids)}; identical rationale {agree_r}/{len(ids)}\n"
         + "".join(f"{s} {x} -> {y} {t}\n" for s, x, y, t in flips))
-    print("\nwrote triage_stability.txt")
+    print("\nwrote 03_screen_accuracy/venue_repeat_run_agreement.txt")
 
 
 if __name__ == "__main__":

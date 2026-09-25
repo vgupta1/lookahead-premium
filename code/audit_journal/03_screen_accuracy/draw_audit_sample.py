@@ -1,37 +1,37 @@
 """Phase 2 measurement sample: blind labelling of the OUT bucket.
 
 Draws a fixed-seed random sample from final_bucket == OUT and writes two files:
-  phase2_sample_<DRAW>.csv  - the record of what was drawn (machine buckets withheld)
-  phase2_sheet_<DRAW>.md    - the reading sheet, ordered randomly, no machine output shown
+  venue_human_audit_random_sample_<DRAW>.csv  - the record of what was drawn (machine buckets withheld)
+  venue_human_audit_sheet_<DRAW>.md    - the reading sheet, ordered randomly, no machine output shown
 The machine's bucket, reason and confidence are deliberately absent from both so the human
-label is not anchored. Verdicts are recorded separately in phase2_verdicts_<DRAW>.csv.
+label is not anchored. Verdicts are recorded separately in venue_human_audit_vg_verdicts_<DRAW>.csv.
 """
 import csv, random
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
 D = lambda n: os.path.join(DATA, n)
 
 DATE, DRAW, N, SEED = "2026-09-16", "2026-09-18", 50, 20260918
 
-final = list(csv.DictReader(open(D(f"triage_final_{DATE}.csv"))))
-sweep = {r["sweep_id"]: r for r in csv.DictReader(open(D(f"venue_sweep_{DATE}.csv")))}
+final = list(csv.DictReader(open(D(f"02_screen/venue_papers_labels_merged_{DATE}.csv"))))
+sweep = {r["sweep_id"]: r for r in csv.DictReader(open(D(f"01_search/venue_papers_with_abstracts_{DATE}.csv")))}
 
 pool = sorted([r for r in final if r["final_bucket"] == "OUT"], key=lambda r: r["sweep_id"])
 sample = random.Random(SEED).sample(pool, N)
 random.Random(SEED + 1).shuffle(sample)
 
-with open(D(f"phase2_sample_{DRAW}.csv"), "w", newline="") as f:
+with open(D(f"03_screen_accuracy/venue_human_audit_random_sample_{DRAW}.csv"), "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(["order", "sweep_id", "venue", "year", "title"])
     for i, r in enumerate(sample, 1):
         w.writerow([i, r["sweep_id"], r["venue"], r["year"], r["title"]])
 
-with open(D(f"phase2_sheet_{DRAW}.md"), "w") as f:
-    f.write(f"""# Phase 2 — blind labelling of the OUT bucket
+with open(D(f"03_screen_accuracy/venue_human_audit_sheet_{DRAW}.md"), "w") as f:
+    f.write(f"""# Blind recheck — re-labelling records the screen excluded
 
 Sample: {N} records drawn at random (seed {SEED}) from the {len(pool)} records with
-`final_bucket == OUT` in `triage_final_{DATE}.csv`. The prompt was frozen before this draw.
+`final_bucket == OUT` in `venue_papers_labels_merged_{DATE}.csv`. The prompt was frozen before this draw.
 The machine's bucket, reason and confidence are withheld.
 
 **Task.** Read each abstract and decide whether it should go to full text. Apply the triage rule:
@@ -49,4 +49,4 @@ taken as agreeing with OUT. If a record is genuinely unclear, mark it and say so
         f.write(f"\n### {i}. {a['title']}\n\n*{a['venue']} {a['year']}*\n\n{a['abstract'].strip()}\n\n")
 
 print(f"pool = {len(pool)} OUT records; drew {N}")
-print(f"wrote phase2_sample_{DRAW}.csv and phase2_sheet_{DRAW}.md")
+print(f"wrote venue_human_audit_random_sample_{DRAW}.csv and venue_human_audit_sheet_{DRAW}.md")

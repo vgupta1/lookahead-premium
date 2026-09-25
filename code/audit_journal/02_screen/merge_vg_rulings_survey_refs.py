@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-apply_seed_rulings.py -- VG's rulings on the seed screen -> seed_screen_final_<DATE>.csv
+merge_vg_rulings_survey_refs.py -- merges VG's rulings into the survey screen's labels.
 
-Same discipline as apply_adjudications.py: the machine output (seed_screen_<DATE>.csv) is NEVER
-modified, so every human override is visible as a diff between the two files.
+Same discipline as merge_vg_rulings_venue_papers.py: the machine output (survey_refs_llm_labels_<DATE>.csv) is
+NEVER modified, so every human override is visible as a diff between the two files.
 
 VG reviewed, one row per work, EVERY record the screen did not call CANDIDATE unanimously:
 all BACKGROUND, all BORDERLINE, and any record whose three runs disagreed. In the review sheet
-(seed_screen_review_<DATE>.csv) a blank `vg_ruling` means "accept the machine bucket"; BORDERLINE
+(survey_refs_vg_rulings_<DATE>.csv) a blank `vg_ruling` means "accept the machine bucket"; BORDERLINE
 is not a terminal bucket and must be ruled either way.
 
 Final buckets are CANDIDATE (goes to full text) and BACKGROUND (excluded, with a recorded reason).
@@ -17,12 +17,13 @@ import csv, os, collections
 
 DATE = "2026-09-22"
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
-FRAME = "seed_frame_2026-09-21.csv"
-SCREEN, REVIEW = f"seed_screen_{DATE}.csv", f"seed_screen_review_{DATE}.csv"
-OUT = f"seed_screen_final_{DATE}.csv"
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
+SURVEY_REFS = "01_search/survey_refs.csv"
+SCREEN = f"02_screen/survey_refs_llm_labels_{DATE}.csv"
+REVIEW = f"02_screen/survey_refs_vg_rulings_{DATE}.csv"
+OUT = f"02_screen/survey_refs_labels_merged_{DATE}.csv"
 
-frame = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(DATA, FRAME), encoding="utf-8"))}
+frame = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(DATA, SURVEY_REFS), encoding="utf-8"))}
 scr = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(DATA, SCREEN), encoding="utf-8"))}
 rev = {r["frame_id"]: r for r in csv.DictReader(open(os.path.join(DATA, REVIEW), encoding="utf-8"))}
 

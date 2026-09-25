@@ -15,13 +15,19 @@ __pycache__/
 
 # Scopus downloads of any kind: Elsevier's terms restrict redistributing records,
 # and the abstracts are publisher copyright. See data/audit_journal/README.md.
-data/audit_journal/scopus_*.csv
-data/audit_journal/venue_sweep_2026-*.csv
+data/audit_journal/**/scopus_*.csv
+data/audit_journal/**/*_with_abstracts_*.csv
 
 # Hand-review sheets: these quote the abstracts of the records under review
 # verbatim (publisher copyright, same grounds as the Scopus exports above).
-# The rulings they produced ARE committed, in triage_adjudications_<DATE>.csv,
-# phase2_verdicts_<DATE>.csv and seed_screen_review_<DATE>.csv.
-data/audit_journal/phase2_sheet_*.md
-data/audit_journal/triage_phase1_review.md
-data/audit_journal/triage_split_adjudication.md
+# One pattern, matched on the name shape, so a sheet added later is caught
+# without anyone having to remember to extend this list.
+# The rulings the sheets produced ARE committed -- the reasons, not the
+# abstracts: venue_papers_vg_rulings_<DATE>.csv, survey_refs_vg_rulings_<DATE>.csv
+# and venue_human_audit_vg_verdicts_<DATE>.csv.
+data/audit_journal/**/*_sheet_*.md
+
+# Resume cache for the survey screen: raw per-call model votes. The committed labels
+# already carry every record's three votes (buckets_all) and the majority reason, so this
+# is plumbing, not evidence. Stays on disk locally.
+data/audit_journal/**/_cache/

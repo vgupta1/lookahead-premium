@@ -1,0 +1,2 @@
+prompt_hash=4bc0e50d09eb model=claude-opus-4-5-20251101 temperature=0 n=100
+bucket agreement 100/100; identical rationale 76/100

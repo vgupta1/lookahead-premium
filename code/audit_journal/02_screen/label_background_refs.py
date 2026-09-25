@@ -1,58 +1,61 @@
 #!/usr/bin/env python3
 """
-seed_screen.py -- coarse screen of the seed-survey references (journal_audit_protocol.md 2.6, step 1).
+label_background_refs.py -- labels each work the two surveys cite, from its printed reference
+line alone, as plainly background or worth reading (journal_audit_protocol.md 2.6, step 1).
 
-The seed frame is the reference lists of the two seed surveys. Reference lists carry no abstracts,
-so this screen sees only the printed reference string. It sorts each cited WORK into
+It PROPOSES; it does not exclude. Every BACKGROUND, every BORDERLINE and every record the runs
+disagree on goes to VG, who ruled on all 127 of them -- a census, not a sample.
+
+A bibliography carries no abstracts, so this screen sees only the printed reference string. It sorts each cited WORK into
 
     CANDIDATE   plausibly relevant; goes to full text
     BORDERLINE  cannot be ruled background with confidence; VG rules
     BACKGROUND  plainly background (textbooks, general ML methods, software, unrelated fields)
 
 and nothing it decides is terminal: every BACKGROUND and BORDERLINE record, and every record on
-which the runs disagree, goes to VG for review (seed_screen_review_<DATE>.csv). The number reported
+which the runs disagree, goes to VG for review (survey_refs_vg_rulings_<DATE>.csv). The number reported
 is VG's count of false exclusions over the WHOLE excluded pile -- a census, not a sample.
 
-It mirrors triage_screen.py: a fixed prompt (the prompt IS the method), the same pinned model,
+It mirrors screen_venue_abstracts.py: a fixed prompt (the prompt IS the method), the same pinned model,
 temperature 0, k runs with a majority vote, and per-record reason + prompt hash + model id. The
 prompt is different because the input is different (a reference string, not an abstract) and so is
 the question (background vs not, rather than on-topic vs off-topic among venue papers).
 
-UNIT. seed_frame_2026-09-21.csv has 313 bibliography entries = 305 works; rows with `dup_of` set
+UNIT. 01_search/survey_refs.csv has 313 bibliography entries = 305 works; rows with `dup_of` set
 are second copies of a work and inherit the canonical row's label (the model sees ALL printed
 strings for a work at once). The two surveys' entries for each other (SF0185, SF0243) are labelled
 SEED structurally, not by the model. So the model classifies 303 works.
 
     export ANTHROPIC_API_KEY=...
-    python3 seed_screen.py --dry-run      # no API calls: counts, and the prompt for one record
-    python3 seed_screen.py --validate     # control set only (26 calls); must pass
-    python3 seed_screen.py --run          # control set, then 303 works x 3 runs (~935 calls)
-    python3 seed_screen.py --run          # again after any interruption: resumes from the cache
-    python3 seed_screen.py --run --fresh  # ignore the cache and re-ask every record
+    python3 label_background_refs.py --dry-run      # no API calls: counts, and the prompt for one record
+    python3 label_background_refs.py --validate     # control set only (26 calls); must pass
+    python3 label_background_refs.py --run          # control set, then 303 works x 3 runs (~935 calls)
+    python3 label_background_refs.py --run          # again after any interruption: resumes from the cache
+    python3 label_background_refs.py --run --fresh  # ignore the cache and re-ask every record
 
-RESUMABLE. Each vote is appended to seed_screen_cache_<DATE>.jsonl the moment it returns, keyed by
+RESUMABLE. Each vote is appended to survey_refs_model_votes_<DATE>.jsonl the moment it returns, keyed by
 (frame_id, run index, prompt_hash, model). A dropped connection, a laptop sleeping or a Ctrl-C
 therefore costs one call, not the whole run -- rerun the same command. A vote is reused only if the
 prompt hash and model still match, so editing the prompt invalidates the cache by construction.
 
 OUTPUTS
-    seed_screen_cache_<DATE>.jsonl   every vote as it is returned; the run RESUMES from this file
-    seed_screen_<DATE>.csv           one row per frame entry (313), machine labels
-    seed_screen_review_<DATE>.csv    the rows VG reviews, with blank vg_ruling / vg_note columns
-    seed_screen_validation.txt       control-set result
+    02_screen/_cache/survey_refs_model_votes_<DATE>.jsonl   every vote as returned; the run resumes from it
+    02_screen/survey_refs_llm_labels_<DATE>.csv   one row per reference entry (313), machine labels
+    02_screen/survey_refs_vg_rulings_<DATE>.csv   the rows VG reviews, blank vg_ruling / vg_note
+    03_screen_accuracy/survey_control_result.txt   control-set result
 """
 
 import os, sys, csv, json, time, socket, hashlib, datetime, argparse, urllib.request, urllib.error, collections
 import http.client
 
-MODEL = "claude-opus-4-5-20251101"   # same pinned snapshot as triage_screen.py; a model change is a
+MODEL = "claude-opus-4-5-20251101"   # same pinned snapshot as screen_venue_abstracts.py; a model change is a
                                      # methodology change
 TEMPERATURE = 0
 RUNS = 3
 DATE = "2026-09-22"          # names the outputs; the frame it reads is dated separately
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
-FRAME = "seed_frame_2026-09-21.csv"
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
+SURVEY_REFS = "01_search/survey_refs.csv"
 SEED_SELF = {"SF0185": "the JAIR seed survey itself (arXiv version, cited by EJOR)",
              "SF0243": "the EJOR seed survey itself (cited by JAIR)"}
 
@@ -197,7 +200,7 @@ def check_control_disjoint(works):
 
 
 def load_works():
-    rows = list(csv.DictReader(open(os.path.join(DATA, FRAME), encoding="utf-8")))
+    rows = list(csv.DictReader(open(os.path.join(DATA, SURVEY_REFS), encoding="utf-8")))
     assert len(rows) == 313, len(rows)
     works = collections.OrderedDict()
     for r in rows:
@@ -249,7 +252,7 @@ def classify(msg, key, model=MODEL):
             raise
 
 
-CACHE = f"seed_screen_cache_{DATE}.jsonl"
+CACHE = f"02_screen/_cache/survey_refs_model_votes_{DATE}.jsonl"
 
 
 def load_cache(model, fresh=False):
@@ -298,7 +301,7 @@ def validate(key, works, model=MODEL):
            f"{len(CONTROL_NEG)} obvious background must be BACKGROUND)", ""] + lines
     for fid, want, v in fails:
         out.append(f"FAIL {fid} [{want}] -> {v['bucket']}: {v['reason']}")
-    open(os.path.join(DATA, "seed_screen_validation.txt"), "w").write("\n".join(out) + "\n")
+    open(os.path.join(DATA, "03_screen_accuracy/survey_control_result.txt"), "w").write("\n".join(out) + "\n")
     print("\n" + "\n".join(out[:3]))
     return not fails
 
@@ -344,7 +347,7 @@ def run(key, rows, works, model=MODEL, k=RUNS, fresh=False):
                         year=r["year"], model_id=model if L["method"] == "llm" else "",
                         runs=k if L["method"] == "llm" else "",
                         prompt_hash=PROMPT_HASH if L["method"] == "llm" else "", run_date=today))
-    p = os.path.join(DATA, f"seed_screen_{DATE}.csv")
+    p = os.path.join(DATA, f"02_screen/survey_refs_llm_labels_{DATE}.csv")
     with open(p, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(out[0].keys())); w.writeheader(); w.writerows(out)
 
@@ -363,7 +366,7 @@ def run(key, rows, works, model=MODEL, k=RUNS, fresh=False):
                             vg_ruling="", vg_note=""))
     order = {"BORDERLINE": 0, "CANDIDATE": 1, "BACKGROUND": 2}
     rev.sort(key=lambda r: (order[r["machine_bucket"]], r["frame_id"]))
-    rp = os.path.join(DATA, f"seed_screen_review_{DATE}.csv")
+    rp = os.path.join(DATA, f"02_screen/survey_refs_vg_rulings_{DATE}.csv")
     with open(rp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rev[0].keys())); w.writeheader(); w.writerows(rev)
 
@@ -383,7 +386,7 @@ if __name__ == "__main__":
     ap.add_argument("--model", default=MODEL)
     ap.add_argument("--runs", type=int, default=RUNS)
     ap.add_argument("--fresh", action="store_true",
-                    help="ignore seed_screen_cache_<DATE>.jsonl and re-ask every record")
+                    help="ignore survey_refs_model_votes_<DATE>.jsonl and re-ask every record")
     a = ap.parse_args()
     rows, works = load_works()
     if a.dry_run:

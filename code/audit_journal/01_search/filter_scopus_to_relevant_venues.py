@@ -1,54 +1,50 @@
 #!/usr/bin/env python3
 """
-build_venue_sweep.py — journal-version literature audit, piece 1 (the frame).
+filter_scopus_to_relevant_venues.py
 
-Turns raw Scopus exports into the venue-sweep table, joins it to the seed frame,
-and runs the search-recall validation.
+Takes one Scopus search result, keeps only the papers published at our eleven venues in
+2023-2026, marks which of them the two surveys already cite, and reports how many known
+2023 papers the search found.
 
-    python3 build_venue_sweep.py            # writes venue_sweep_<DATE>.csv + validation_<DATE>.txt
+    python3 filter_scopus_to_relevant_venues.py
 
-INPUTS  (all in this directory)
-  scopus_export_2026-09-16_v5.csv  THE export of record: one Scopus run, the query in
-                                   journal_audit_protocol.md section 5A.3. Export fields must include
-                                   Abstract, Source title, Conference name, DOI, Link,
-                                   Document Type, EID, Author Keywords and Index Keywords.
-  seed_frame_2026-09-21.csv        the 313 bibliography entries (305 distinct works) of the two seed
-                                   surveys, keyed by frame_id; see repair_seed_frame.py.
+READS   01_search/scopus_export_2026-09-16.csv   the search result of record. Export from Scopus
+                                                 with Abstract, Source title, Conference name, DOI,
+                                                 Link, Document Type, EID and both Keyword fields.
+                                                 Gitignored: Elsevier restricts redistribution.
+        01_search/survey_refs.csv                the 313 references of the two surveys, keyed by
+                                                 frame_id. Extracted from the survey PDFs outside
+                                                 this repository; corrections to that extraction are
+                                                 recorded in its own dup_of and repair_note columns.
 
-  The query went through five revisions during development (journal_audit_protocol.md 5A.2). The export of
-  record, v5, was verified to return exactly the union of all five -- 379 in-venue records, none
-  missing, none new -- which is what makes a single run sufficient. The superseded exports are
-  archived outside the repository and no code reads them.
+WRITES  01_search/venue_papers_with_abstracts_<DATE>.csv   379 records, one row per paper (gitignored)
+        01_search/venue_papers_no_abstracts_<DATE>.csv          the same rows minus abstracts and keywords
+        01_search/known_2023_papers_found.txt           the recall check, below
 
-OUTPUTS  (named by BUILD_DATE, not by the export date)
-  venue_sweep_<BUILD_DATE>.csv       one row per paper at the eleven venues, 2023-2026 (gitignored:
-                                     carries Scopus abstracts).
-  venue_sweep_keys_<BUILD_DATE>.csv  the same rows without abstracts or keywords -- the shareable file.
-  validation_<BUILD_DATE>.txt        the recall check against the 2023 overlap year.
+THE RECALL CHECK. 2023 is covered by both the surveys and the search, so the surveys supply a known
+answer to score the search against: of the 19 works the surveys cite that were published at these
+venues in 2023, the search found 14. A miss is a failure of the *search*, not a hole in the corpus —
+those papers are in the list anyway, via the surveys.
 
-  2026-09-21 rebuild: the seed-frame join matched on a space-preserving normalized title only, so
-  five sweep records already in the frame carried no frame_id (hyphenation, a 'Technical Note--'
-  prefix, an abbreviated title, a retitled arXiv entry, a workshop version), and the recall check,
-  which used the same test, scored SF0133 a miss. Search recall on the 2023 year is 14/19, not 13/19.
-  The join is now link_frame_id() below. Records, venues and sweep_ids are unchanged.
+WHY THE VENUE FILTER IS HERE AND NOT IN THE QUERY. Scopus source-title patterns are loose:
+SRCTITLE("Operations Research") also returns *Annals of*, *Computers and* and *Lecture Notes in*
+Operations Research, and asking for LNCS returns all of LNCS rather than CPAIOR alone. Deciding
+venue membership in versioned code is reproducible; tightening the query would hide the decision in
+a search box and could silently drop a venue whose title varies by year.
 
-WHY THE VENUE FILTER IS LOCAL, NOT IN THE QUERY
-  The Scopus query restricts SRCTITLE only loosely (see journal_audit_protocol.md 5A). Loose patterns
-  such as SRCTITLE("Operations Research") also return *Annals of*, *Computers and*, and
-  *Lecture Notes in* Operations Research, and SRCTITLE("Lecture Notes in Computer Science*")
-  returns all of LNCS rather than CPAIOR alone. Deciding venue membership HERE, in code that is
-  read and versioned, is reproducible; tightening the query instead would hide the decision
-  inside a search box and risks silently dropping a venue whose source title varies by year.
+The query went through five revisions (journal_audit_protocol.md 5A.2). The export of record, v5,
+returns exactly the union of all five -- 379 in-venue records, none missing, none new -- which is
+why one run suffices. The superseded exports are archived outside the repository; no code reads them.
 """
 
 import csv, re, sys, glob, unicodedata, collections, datetime, os
 
 csv.field_size_limit(10**9)
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
 DATE = "2026-09-16"          # date of the Scopus export of record
 BUILD_DATE = "2026-09-21"    # date of this build; names the outputs
-SEED_FRAME = "seed_frame_2026-09-21.csv"
+SURVEY_REFS = "01_search/survey_refs.csv"
 
 # Irreducible seed<->sweep links: same work, titles that no normalization equates. Keyed on the
 # Scopus EID so the link survives a title edit. Each needs a stated reason.
@@ -145,7 +141,7 @@ def get(row, key):
     return (row.get(key) or "").strip()
 
 # ---------------------------------------------------------------- load
-RECORD_EXPORT = "scopus_export_2026-09-16_v5.csv"
+RECORD_EXPORT = "01_search/scopus_export_2026-09-16.csv"
 
 def load_export():
     p = os.path.join(DATA, RECORD_EXPORT)
@@ -154,7 +150,7 @@ def load_export():
                  "It is deliberately not distributed with this repository (Elsevier's terms\n"
                  "restrict redistributing downloaded records). See README.md in this directory\n"
                  "for the query to run, the export fields required, and how to recover the exact\n"
-                 "record set from the EIDs in venue_sweep_keys_2026-09-21.csv.")
+                 "record set from the EIDs in venue_papers_no_abstracts_2026-09-21.csv.")
     with open(p, encoding="utf-8-sig", newline="") as f:
         rows = list(csv.DictReader(f))
     required = ["Title", "Abstract", "Source title", "Conference name", "Year", "EID"]
@@ -170,9 +166,9 @@ def main():
     rows, name = load_export()
     print(f"Scopus export of record: {name}  ({len(rows)} rows)\n")
 
-    # seed frame, for the frame_id join and the validation
+    # survey reference list, for the frame_id join and the validation
     seed = []
-    sp = os.path.join(DATA, SEED_FRAME)
+    sp = os.path.join(DATA, SURVEY_REFS)
     if os.path.exists(sp):
         with open(sp, encoding="utf-8-sig", newline="") as f:
             seed = list(csv.DictReader(f))
@@ -210,13 +206,13 @@ def main():
             source_title=get(r, "Source title"), conference_name=get(r, "Conference name"),
             doc_type=get(r, "Document Type"), eid=get(r, "EID")))
 
-    outp = os.path.join(DATA, f"venue_sweep_{BUILD_DATE}.csv")
+    outp = os.path.join(DATA, f"01_search/venue_papers_with_abstracts_{BUILD_DATE}.csv")
     cols = ["sweep_id","venue","year","title","authors","abstract","url","doi",
             "matched_keywords","frame_id","frame_link","author_keywords","index_keywords",
             "source_title","conference_name","doc_type","eid"]
     with open(outp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(out)
-    kp = os.path.join(DATA, f"venue_sweep_keys_{BUILD_DATE}.csv")
+    kp = os.path.join(DATA, f"01_search/venue_papers_no_abstracts_{BUILD_DATE}.csv")
     kcols = ["sweep_id","venue","year","title","authors","doi","url","frame_id","frame_link",
              "source_title","conference_name","doc_type","eid"]
     with open(kp, "w", newline="", encoding="utf-8") as f:
@@ -231,7 +227,7 @@ def main():
         c = [vy[(v, y)] for y in YEARS]
         print(f"  {v:<12}{c[0]:5d}{c[1]:5d}{c[2]:5d}{c[3]:5d}{sum(c):5d}")
     print(f"  {'TOTAL':<12}{'':20}{len(out):5d}")
-    print(f"\n  already in the seed frame: {sum(1 for o in out if o['frame_id'])}"
+    print(f"\n  already in the survey reference list: {sum(1 for o in out if o['frame_id'])}"
           f"  -> new from the sweep: {sum(1 for o in out if not o['frame_id'])}")
     print(f"  keyword-field-only matches (not reproducible from title+abstract): "
           f"{sum(1 for o in out if o['matched_keywords'].startswith('(scopus'))}")
@@ -274,7 +270,7 @@ def main():
                f"known 2023 papers at the eleven venues : {tot}",
                f"recovered by the sweep                 : {rec}  ({rec/tot:.0%})" if tot else "",
                f"missed                                 : {tot-rec}", ""] + lines)
-    vp = os.path.join(DATA, f"validation_{BUILD_DATE}.txt")
+    vp = os.path.join(DATA, "01_search/known_2023_papers_found.txt")
     open(vp, "w", encoding="utf-8").write("\n".join(report) + "\n")
     print("\n" + "\n".join(report))
     print(f"\nwrote {vp}")

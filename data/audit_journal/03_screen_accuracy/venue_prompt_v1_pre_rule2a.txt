@@ -1,0 +1,57 @@
+# The first venue-screen prompt (superseded)
+
+Prompt hash 6cdbe5801fa3. Used with claude-sonnet-4-5-20250929, temperature 0, on the 379 venue
+records, 2026-09-17. Recovered from commit 5e237a3 of screen_venue_abstracts.py (then
+triage_screen.py).
+
+Reviewing its OUT bucket showed it excluded work where the learned component IS the solver rather
+than a predictor of problem data. Rule 2a was added to close that, which moved 15 of 379 records;
+the revised prompt (hash 4bc0e50d09eb, model claude-opus-4-5-20251101) is the one in
+02_screen/screen_venue_abstracts.py and the one every reported number comes from. The labels this
+prompt produced are not kept; see the git history at 5e237a3 if they are ever needed.
+
+Verdicts from that review: venue_prompt_tuning_review_verdicts_2026-09-17.md
+
+---
+
+You are screening papers for a literature audit of *contextual optimization* -- settings where an optimization problem must be solved but some of its parameters are not known and are predicted from context (also called decision-focused learning, predict-then-optimize, smart predict-then-optimize, integrated learning and optimization).
+
+You are performing TOPIC TRIAGE ONLY: deciding whether this paper is worth obtaining the full text of. You are NOT deciding whether it belongs in the audit.
+
+Classify into exactly one bucket:
+
+CANDIDATE -- there is an optimization or decision problem that is the OBJECT of the work (routing, scheduling, matching, shortest path, knapsack, portfolio, inventory, assignment, ranking, an LP or MIP, a planning or control problem), AND a learned or predictive component appears in the same pipeline.
+
+OUT -- either (a) there is no decision or optimization problem at all (generative modelling, representation learning, forecasting with no downstream decision, dataset or benchmark papers), or (b) the only "optimization" is machinery for training or compressing the model itself (hyperparameter optimization, neural architecture search, pruning, distillation, training dynamics), or (c) the work is numerical simulation or solving of physical systems (PDE solvers, differentiable physics) with no decision problem.
+
+UNCLEAR -- you cannot tell from the title and abstract.
+
+CRITICAL RULES -- these encode failures observed in testing:
+
+1. DO NOT ask whether anything is predicted, estimated, or uncertain. Many in-scope papers describe only their METHOD ("we differentiate through a combinatorial solver") and never mention prediction in the abstract, because the setting appears only in their experiments. Excluding on this basis wrongly dropped 4 of 12 known in-scope papers in testing.
+
+2. DO NOT exclude a paper because it reads like solver, layer, or proxy work. "Differentiating through a solver", "optimization as a layer", "embedding discrete solvers", "combinatorial building blocks in neural networks" are all CANDIDATE. Whether such a paper is genuinely in scope is decided later, from the full text.
+
+3. When torn between CANDIDATE and OUT, choose CANDIDATE. A wrong OUT is invisible later; a wrong CANDIDATE costs one PDF.
+
+4. UNCLEAR is for genuine ambiguity, not mild doubt. It is treated as CANDIDATE downstream.
+
+WORKED EXAMPLES
+
+"Learning with Differentiable Perturbed Optimizers" -- pipelines rely on optimization procedures to make discrete decisions (sorting, nearest neighbors, shortest paths); we transform optimizers into differentiable operations.
+-> CANDIDATE. Shortest paths and ranking are decision problems and are the object of the work; a learned model sits in the same pipeline. The abstract never says anything is predicted -- rule 1 says that is irrelevant.
+
+"Nonsmooth Implicit Differentiation" -- derivative of the fixed point of a contraction map, with applications to hyperparameter optimization, meta-learning, data poisoning.
+-> OUT. Every named application is model-training machinery; no external decision problem.
+
+"Learning Neural PDE Solvers with Parameter-Guided Channel Attention"
+-> OUT. Numerical simulation of a physical system.
+
+"Addressing Negative Transfer in Diffusion Models"
+-> OUT. Generative modelling; no decision problem as the object.
+
+"DISTRICTNET: Decision-aware learning for geographical districting"
+-> CANDIDATE. Districting is a combinatorial decision problem and the object of the work.
+
+Return ONLY a JSON object, no other text:
+{"bucket": "CANDIDATE" | "OUT" | "UNCLEAR", "reason": "<one sentence, max 25 words>", "confidence": "high" | "medium" | "low"}

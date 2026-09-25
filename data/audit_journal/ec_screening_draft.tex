@@ -63,9 +63,11 @@ a reader disagreeing with a particular exclusion can see the stated ground for i
 
 Because greedy decoding does not make a language model deterministic, every record is classified
 three times and assigned its majority bucket, with the three individual buckets retained so that a
-split is visible rather than silently resolved. Re-running the classifier on one hundred records
-reproduced the assigned bucket in \(99\) cases. That figure concerns decoding variation alone, and we
-are explicit below that it is not the quantity a reader should care most about.
+split is visible rather than silently resolved. Re-classifying one hundred records under the pinned
+model returned the assigned bucket in all \(100\) cases, with the stated rationale identical in
+\(76\). Note what this compares: a fresh single classification against the three-run majority of
+record, which is the quantity that enters the labels we use. It concerns decoding variation alone,
+and we are explicit below that it is not the quantity a reader should care most about.
 
 We are careful not to overclaim here. Greedy decoding reduces run-to-run variation but does not
 eliminate it, and a provider-side model revision can move a borderline record. This is why the stage
@@ -91,7 +93,7 @@ it expires when the rule changes.
 
 After adjudication the stage retains \(158\) records and excludes \(221\). Adjudications are stored
 in a separate file and applied programmatically, so the classifier's output is never edited and every
-human override is visible as a difference between two files. No record belonging to the seed frame --
+human override is visible as a difference between two files. No record belonging to the survey reference list --
 the references of the two surveys from which the sampling frame is built (\cref{sec:ECSearch}) -- was
 excluded. This is a consistency check rather than a validation, since a survey's reference list is
 not a gold standard for our inclusion rules, but a failure here would have been informative.
@@ -126,12 +128,15 @@ moving through the undecided bucket. None lie elsewhere. We read this as a targe
 as drift.
 
 \textbf{Measurement.} With the prompt frozen, we drew a fresh random sample of \(50\) of the \(221\)
-excluded records and classified them by hand from title and abstract alone, with the model's bucket,
-rationale and confidence withheld so that the reading was independent of them. All \(50\) were
+excluded records under a recorded seed, and one author classified them by hand from title, venue,
+year and abstract alone, with the model's bucket, rationale and confidence withheld so that the
+reading was independent of them. The draw, the reading sheet and the recorded verdicts are in the
+replication repository, so the sample is reproducible rather than merely described. All \(50\) were
 confirmed excluded. Since the sample is a substantial fraction of a finite population, the
 appropriate bound is hypergeometric rather than binomial: with \(95\%\) confidence, at most \(11\) of
-the \(221\) excluded records are wrongly excluded. (The corresponding Clopper--Pearson bound, which
-discards the finite-population information, is \(5.8\%\), or \(12.9\) records.)
+the \(221\) excluded records are wrongly excluded. (The corresponding Clopper--Pearson bounds, which
+discard the finite-population information, are \(5.8\%\) one-sided, or \(12.9\) records, and
+\(7.1\%\) two-sided.)
 
 The two phases cannot be pooled. Targeted sampling deliberately oversamples where errors are
 expected, so its error rate does not estimate the rate in the excluded pile; and a sample that drove

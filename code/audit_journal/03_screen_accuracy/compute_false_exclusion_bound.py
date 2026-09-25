@@ -11,11 +11,11 @@ import csv
 from math import comb
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "..", "data", "audit_journal"))
+DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
 D = lambda n: os.path.join(DATA, n)
 
-FINAL    = "triage_final_2026-09-16.csv"
-VERDICTS = "phase2_verdicts_2026-09-19.csv"
+FINAL    = "02_screen/venue_papers_labels_merged_2026-09-16.csv"
+VERDICTS = "03_screen_accuracy/venue_human_audit_vg_verdicts_2026-09-19.csv"
 CONF     = 0.95
 
 final = list(csv.DictReader(open(D(FINAL))))
