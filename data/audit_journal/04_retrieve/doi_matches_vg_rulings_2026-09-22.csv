@@ -1,0 +1,3 @@
+survey_ref_id,vg_ruling,vg_doi,vg_note,why,title_score,our_title,our_year,our_first_author,proposed_doi,scopus_title,scopus_year,scopus_source
+SF0060,,,,"title matches but is short enough that two papers could share it, and the year moved 4",1.0,Dynamic pricing with fairness constraints,2021,Cohen,10.1287/opre.2023.0123,Dynamic Pricing with Fairness Constraints,2025,Operations Research
+SF0192,,,,"title matches but is short enough that two papers could share it, and the year moved 2",1.0,Data valuation from data-driven optimization,2023,Mieth,10.1109/TCNS.2024.3431415,Data Valuation From Data-Driven Optimization,2025,IEEE Transactions on Control of Network Systems

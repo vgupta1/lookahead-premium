@@ -95,14 +95,41 @@ a referee ever asks.
 
 ## 04_retrieve
 
-`papers_to_obtain_<DATE>.csv` — **318 papers to obtain**, 130 found only by the venue search, 160
-cited only by the surveys, 28 by both; three are already held as versions of record, so 315 remain.
-`doi_lookup_queries_<DATE>.txt` holds Scopus title queries for the survey-side rows that carry no
-DOI; their results (`scopus_doi_lookup_*`) are gitignored like every other raw Scopus download.
+`papers_to_obtain.csv` — **318 papers**, 130 found only by the venue search, 160 cited only by the
+surveys, 28 by both. **No date: it is rebuilt from the screens every run**, so only its current
+state means anything. Its columns follow this folder's two prefixes — `source` is
+`venue_papers` / `survey_refs` / `both`, `venue_paper_id` is what 02_screen calls `sweep_id`,
+`survey_ref_id` is its `frame_id`.
 
-**Not yet merged.** Seven `scopus_doi_lookup_*` exports are in hand, but nothing has folded their
-DOIs back into `papers_to_obtain_*`, so that file still shows those rows as lacking a DOI. Doing the
-merge is outstanding work on the audit, not part of the tidy-up.
+**All 318 are to be obtained** (VG, 2026-09-25). Three files in `papers/` were checked and found to
+be versions of record, but two of them were missing the appendix they cite, and tracking that was
+more machinery than three papers are worth against 318 to fetch. If they come back down with
+everything else, nothing is lost but three downloads.
+
+**What an appendix is** — settled the same day, and recorded on the corpus entry when a paper
+arrives, not in this list: `appendix_referenced_in_main` (does the paper point at one),
+`appendix_held` (do we have one), `appendix_source` (`in-main` / `publisher-supplement` / `arxiv` /
+`author-site` / `other`). The gap is derived, never stored: referenced and not held is a real hole
+in the audit; not referenced and not held is nothing to act on, and is **not** evidence that no
+appendix exists — short page limits mean authors often never mention a supplement. "No appendix
+exists" is unfalsifiable and is not recorded; where a search looked belongs in the retrieval log.
+
+**DOIs.** 161 of the 318 now carry one: 82 from the venue search, 79 verified from the Scopus title
+lookups. `build_doi_lookup_queries.py` writes the query blocks; VG runs them and saves the exports;
+`merge_doi_lookups.py` matches the records back. **A DOI is accepted only when the title, the first
+author's surname and the year all agree**, and the evidence — Scopus title, year, source, EID,
+similarity score — is stored beside it in `doi_matches_<DATE>.csv`. Anything else goes to
+`doi_matches_vg_rulings_<DATE>.csv` for VG; two rows are waiting there, both a short title whose
+year moved. The 79 rows with no match are
+preprints, theses, workshop papers and books, which Scopus does not index.
+
+**The year is recorded, not required** (VG, 2026-09-25, amending the ±1 rule in
+`journal_audit_protocol.md` §5). A long title matching exactly, with the same first author, is
+decisive on its own, and the drift the old rule flagged pointed the right way: it was a preprint
+whose published version appeared two to four years later, which is the version of record we want.
+`year_delta` carries the drift as evidence. A **short** title is weak evidence — two papers can
+share "Differentiable linearized ADMM" — so there the year still has to agree, which is what the
+two remaining review rows are.
 
 ## Every file, in one place
 
@@ -136,9 +163,11 @@ in "What is deliberately not in this repository" below.
     venue_prompt_v1_pre_rule2a.txt                    the first prompt, superseded
     venue_prompt_tuning_review_verdicts_2026-09-17.md the review that produced rule 2a
 04_retrieve/
-    papers_to_obtain_2026-09-22.csv                   318 papers to obtain, 315 still to get
+    papers_to_obtain.csv                              the 318 papers to obtain; rebuilt each run
     doi_lookup_queries_2026-09-22.txt                 Scopus title queries for rows with no DOI
     scopus_doi_lookup_2026-09-22_{1..7}.csv           their results              (not committed)
+    doi_matches_2026-09-22.csv                        every title match, with the evidence for it
+    doi_matches_vg_rulings_2026-09-22.csv             the 9 matches a script should not decide
 05_fulltext_review/                                   nothing yet
 ```
 
@@ -171,7 +200,9 @@ abstracts, without which the control set cannot be re-run.
     python3 code/audit_journal/01_search/filter_scopus_to_relevant_venues.py
     python3 code/audit_journal/02_screen/screen_venue_abstracts.py --validate   # 12 calls, must print 12/12
     python3 code/audit_journal/02_screen/screen_venue_abstracts.py --run        # ~379 calls, roughly $2
-    python3 code/audit_journal/04_retrieve/build_papers_to_obtain.py
+    python3 code/audit_journal/04_retrieve/build_doi_lookup_queries.py   # after a screen changes
+    python3 code/audit_journal/04_retrieve/merge_doi_lookups.py          # after a Scopus lookup
+    python3 code/audit_journal/04_retrieve/build_papers_to_obtain.py     # folds both in
 
 Decoding is greedy, which sharply reduces run-to-run variation but does not eliminate it: expect
 near-identical, not bit-identical, output from the two screens. Everything else reproduces exactly.
