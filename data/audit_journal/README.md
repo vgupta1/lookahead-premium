@@ -114,13 +114,14 @@ in the audit; not referenced and not held is nothing to act on, and is **not** e
 appendix exists — short page limits mean authors often never mention a supplement. "No appendix
 exists" is unfalsifiable and is not recorded; where a search looked belongs in the retrieval log.
 
-**DOIs.** 161 of the 318 now carry one: 82 from the venue search, 79 verified from the Scopus title
-lookups. `build_doi_lookup_queries.py` writes the query blocks; VG runs them and saves the exports;
+**DOIs.** 163 of the 318 now carry one: 82 from the venue search, 79 verified from the Scopus title
+lookups, 2 accepted by VG on review. `doi_source` says which of the three a row's DOI came from. `build_doi_lookup_queries.py` writes the query blocks; VG runs them and saves the exports;
 `merge_doi_lookups.py` matches the records back. **A DOI is accepted only when the title, the first
 author's surname and the year all agree**, and the evidence — Scopus title, year, source, EID,
 similarity score — is stored beside it in `doi_matches_<DATE>.csv`. Anything else goes to
-`doi_matches_vg_rulings_<DATE>.csv` for VG; two rows are waiting there, both a short title whose
-year moved. The 79 rows with no match are
+`doi_matches_vg_rulings_<DATE>.csv`, which VG fills in and the build reads: two rows went there, both
+a short title whose year moved, and both were accepted on 2026-09-25 (Cohen et al. in *OR* 2025,
+Mieth et al. in *IEEE TCNS* 2025). The 79 rows with no match are
 preprints, theses, workshop papers and books, which Scopus does not index.
 
 **The year is recorded, not required** (VG, 2026-09-25, amending the ±1 rule in

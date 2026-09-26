@@ -12,6 +12,8 @@ edited here:
   02_screen/survey_refs_labels_merged_2026-09-22.csv    survey refs after the screen + VG's rulings
   01_search/survey_refs.csv                             the reference list itself (strings, dup_of)
   04_retrieve/doi_matches_<DATE>.csv                    DOIs verified against Scopus, if present
+  04_retrieve/doi_matches_vg_rulings_<DATE>.csv         VG's answers on the ones a script should
+                                                        not decide
 
 DEDUPLICATION. A work cited by a survey AND found by the venue search is ONE row carrying both ids.
 The link is the `frame_id` column of venue_papers_no_abstracts (28 papers). Survey-side duplicates
@@ -54,14 +56,25 @@ members = collections.defaultdict(list)
 for f, r in refs.items():
     members[r["dup_of"] or f].append(r)
 
-# DOIs verified against Scopus by merge_doi_lookups.py. Only `accepted` rows are used; `review`
-# rows are VG's to rule on and stay blank here, so an unverified DOI can never reach a student.
+# DOIs verified against Scopus by merge_doi_lookups.py, plus VG's rulings on the ones it would not
+# decide. A `review` row contributes nothing until he has ruled on it, so an unverified DOI can
+# never reach a student; `doi_source` records which of the two accepted it.
 doi_path = os.path.join(DATA, "04_retrieve", f"doi_matches_{DOI_DATE}.csv")
-verified_doi = {}
+rulings_path = os.path.join(DATA, "04_retrieve", f"doi_matches_vg_rulings_{DOI_DATE}.csv")
+verified_doi, ruled_doi = {}, {}
 if os.path.exists(doi_path):
     for r in csv.DictReader(open(doi_path, encoding="utf-8")):
         if r["decision"] == "accepted" and r["doi"].strip():
             verified_doi[r["survey_ref_id"]] = r["doi"].strip()
+if os.path.exists(rulings_path):
+    for r in csv.DictReader(open(rulings_path, encoding="utf-8")):
+        ruling = (r["vg_ruling"] or "").strip().lower()
+        assert ruling in ("", "accept", "reject"), \
+            f"{r['survey_ref_id']}: vg_ruling is {r['vg_ruling']!r}, expected accept or reject"
+        if ruling == "accept":
+            doi = (r["vg_doi"] or "").strip() or (r["proposed_doi"] or "").strip()
+            assert doi, f"{r['survey_ref_id']}: accepted but no DOI in vg_doi or proposed_doi"
+            ruled_doi[r["survey_ref_id"]] = doi
 
 def surname(s):
     m = re.match(r"([A-Za-zÀ-ÿ'\-]+)", (s or "").split(",")[0].strip())
@@ -94,12 +107,13 @@ for rid, lab in sorted(ref_labels.items()):
     if lab["final_bucket"] != "CANDIDATE" or lab["canonical_id"] != rid or rid in linked_refs:
         continue
     m = members[rid]
-    doi = verified_doi.get(rid, "")
+    doi = ruled_doi.get(rid) or verified_doi.get(rid, "")
+    src = ("scopus_title_lookup_vg_ruled" if rid in ruled_doi else
+           "scopus_title_lookup_verified" if doi else "")
     rows.append(dict(
         source="survey_refs", venue_paper_id="", survey_ref_id=rid,
         first_author=surname(m[0]["first_author"] + ","), year=m[0]["year"], venue="",
-        title=best_title(m), doi=doi,
-        doi_source=("scopus_title_lookup_verified" if doi else ""), url="", eid="",
+        title=best_title(m), doi=doi, doi_source=src, url="", eid="",
         survey_refs_bucket="CANDIDATE",
         reference=" ".join(m[0]["full_entry"].split()),
         bibkey_prefix=f"{surname(m[0]['first_author'] + ',')}{m[0]['year']}_"))
@@ -122,7 +136,8 @@ assert C["both"] + C["survey_refs"] == n_ref_cand + 2, (C, n_ref_cand)  # +2: ke
 print(f"{OUT}: {len(rows)} papers  {dict(C)}")
 print(f"  carry a DOI              : {sum(1 for r in rows if r['doi'].strip())}"
       f"  (venue search {sum(1 for r in rows if r['doi_source'] == 'scopus_venue_search')}, "
-      f"verified title lookup {sum(1 for r in rows if r['doi_source'] == 'scopus_title_lookup_verified')})")
+      f"verified title lookup {sum(1 for r in rows if r['doi_source'] == 'scopus_title_lookup_verified')}, "
+      f"VG-ruled {sum(1 for r in rows if r['doi_source'] == 'scopus_title_lookup_vg_ruled')})")
 print(f"  no DOI yet               : {sum(1 for r in rows if not r['doi'].strip())}")
 print(f"  -> every one of the {len(rows)} is to be obtained: version of record plus appendix")
 if not os.path.exists(doi_path):
