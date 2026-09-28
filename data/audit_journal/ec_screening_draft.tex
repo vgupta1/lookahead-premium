@@ -1,5 +1,178 @@
-\section{Abstract-Stage Triage}
-\label{sec:ECTriage}
+\section{Constructing the Frame}
+\label{sec:ECSearch}
+
+Any claim about what a literature does requires a stated denominator, and this appendix is ours. We
+do not attempt a systematic review. We build a frame that is \emph{purposive but reproducible}: a
+search that is stated precisely enough to be replayed, from two sources chosen because they fail in
+different directions.
+
+The first source is the reference list of each of two recent surveys of the area -- \citet{mandi2024decision}
+and \citet{sadana2025survey} -- taking every work they cite as a candidate. Reference lists reach
+back in time and across subfields, and they are curated by authors other than us, which is their
+value here. Their weakness is that they stop at their own publication dates and inherit whatever
+their authors chose to read. The second source is a keyword search of eleven venues over
+2023--September 2026. A database query reaches what the surveys missed or postdate, and it applies a
+stated rule rather than a judgement; its weakness is that it finds only what shares vocabulary with
+the query. Neither source alone would be adequate, and we quantify the second's incompleteness
+below.
+
+\subsection{Sources, Venues and Window}
+
+The eleven venues are NeurIPS, ICML, ICLR, AAAI, IJCAI and AISTATS on the machine-learning side;
+\emph{Operations Research}, \emph{Management Science}, \emph{Manufacturing \& Service Operations
+Management} and the \emph{INFORMS Journal on Computing} on the operations side; and CPAIOR, which
+carries much of the constraint-programming work in this area. Notable exclusions are deliberate:
+\emph{EJOR}, which is high-volume and already reached through \citet{sadana2025survey}, together
+with \emph{JMLR}, \emph{TMLR}, \emph{Mathematics of Operations Research}, \emph{Production and
+Operations Management} and \emph{Naval Research Logistics}. The frame is bounded by design, and we
+disclose the boundary rather than implying coverage we do not have.
+
+Preprints enter only by being cited in a survey. We ran no arXiv or OpenReview sweep, because such a
+search is not a stable frame -- the result depends on the day it is run -- which is the exact
+objection this appendix exists to answer.
+
+The window overlaps the surveys' own coverage by roughly a year, and that overlap is not waste. It
+supplies a known answer against which the search can be scored, and we report that score below.
+
+\subsection{The Reference Lists}
+
+Both bibliographies were parsed from the published PDFs rather than taken from a bibliographic
+graph, and the difference matters. For the same two articles, OpenAlex returned \(129\) referenced
+works against the \(153\) that \citet{mandi2024decision} prints -- \(16\%\) short, with eighteen dead
+identifiers and at least three matcher false positives -- and \(209\) against the \(191\) printed by
+\citet{sadana2025survey}. Crossref holds no references at all for the first. Where an independent
+check was available it agreed with the parse: the publisher's Crossref deposit for the second lists
+\(191\), exactly what the parse returned. We also checked each parsed list for alphabetical
+monotonicity, which is what catches the merged and split entries that hanging-indent parsing
+produces, and found no violations in either.
+
+Merging the two lists is where the care is required. \(31\) works match on normalized title. A
+further seven are the same work printed differently in the two bibliographies -- hyphenation lost in
+extraction (\texttt{decisionmaking}), an arXiv title against the proceedings title of the same
+paper, a preprint year against a published one -- and one work appears twice within a single
+bibliography, as a conference paper and as the journal article it became. Two entries were also
+restored after a parse collision: both print a volume number before the title, both reduced to the
+title \texttt{Vol}, and one was silently absorbed into the other.
+
+We record the lesson because it generalizes. Title matching failed here in both directions at once,
+producing one false merge and missing seven true pairs, roughly a fifth of the overlap. A match
+between two reference lists needs a review of near misses and of short or degenerate titles, not
+merely a pass over exact hits. After these corrections -- each recorded in the frame file itself,
+with its reason -- the reference lists contribute \(313\) printed entries, \(305\) distinct works,
+of which \(38\) are cited by both surveys.
+
+That last number is worth a sentence of its own. Two surveys of the same subject, one written from
+the machine-learning side and one from the operations side, share about one work in eight.
+
+\subsection{The Query}
+
+The search terms are recall-oriented, with precision left to the screening stages
+(\cref{sec:ECVenueScreen}): the vocabulary of decision-focused learning and predict-then-optimize,
+of contextual and prescriptive optimization, of end-to-end and task-based learning, and of the
+differentiable-optimization machinery this literature builds on. Three families of term were
+considered and rejected. \emph{Learning to optimize} denotes a different field and is very noisy;
+bare \emph{regret} paired with predict or optimize returns most of the bandit literature; and the
+oracle-naming terms -- \emph{full-information optimum}, \emph{perfect foresight}, \emph{wait-and-see}
+-- target our object directly but pull in large volumes of reinforcement-learning work. The last of
+these is worth revisiting as a validation probe rather than as a search term.
+
+The query of record was run once, in Scopus Advanced Search, on 2026-09-16:
+
+\begin{verbatim}
+TITLE-ABS-KEY (
+    "decision-focused learning" OR "decision focused learning"
+ OR ( predict* W/3 optimi* )
+ OR "predict-then-optimize" OR "predict then optimize"
+ OR "predict and optimize" OR "predict+optimize"
+ OR "prediction and optimization"
+ OR "smart predict"
+ OR "contextual optimization" OR "contextual stochastic optimization"
+ OR "integrated learning and optimization" OR "learning-integrated optimization"
+ OR "decision-aware learning"
+ OR "task-based learning" OR "task loss"
+ OR "decision loss" OR "decision losses"
+ OR "differentiable optimization" OR "prescriptive analytics"
+ OR "predictive to prescriptive"
+ OR "feature-based newsvendor" OR "data-driven newsvendor"
+ OR ( "end-to-end learning" AND ( optimization OR decision ) )
+ OR "optimization layer" OR "optimization layers"
+ OR "unrolled solver*" OR "folded optimization" OR "differentiable combinatorial"
+ OR ( differentiable W/2 ( solver* OR algorithm* OR "shortest path*" ) )
+ OR ( "implicit differentiation"
+      AND ( stochastic OR uncertain* OR predict* OR contextual ) )
+ OR ( "data-driven optimization"
+      AND ( context* OR covariate OR "side information" OR predict* ) )
+ OR ( ( "side information" OR "covariate information" )
+      AND ( optimi* OR decision OR prescriptive ) )
+)
+AND PUBYEAR > 2022
+AND (
+    SRCTITLE ( "Advances in Neural Information Processing Systems" )
+ OR SRCTITLE ( "Proceedings of Machine Learning Research" )
+ OR SRCTITLE ( "*AAAI Conference on Artificial Intelligence*" )
+ OR SRCTITLE ( "IJCAI International Joint Conference on Artificial Intelligence" )
+ OR SRCTITLE ( "*Learning Representations*" )
+ OR SRCTITLE ( "Lecture Notes in Computer Science*" )
+ OR SRCTITLE ( "Operations Research" )
+ OR SRCTITLE ( "Management Science" )
+ OR SRCTITLE ( "Manufacturing and Service Operations Management" )
+ OR SRCTITLE ( "INFORMS Journal on Computing" )
+)
+\end{verbatim}
+
+It returns \(829\) records, of which \(379\) are at the eleven venues in the window. Venue membership
+is decided afterwards, in versioned code, rather than by tightening the query: the source-title
+clauses above are deliberately loose, because several venues cannot be identified from the source
+title at all, and a decision made in a search box is neither inspectable nor reproducible.
+
+Four indexing behaviours cost us records before they were found, and we report them because they are
+invisible from a result set and will recur for anyone running this search. AAAI 2023 sits under a
+source title carrying an ordinal inside the string, so an exact-phrase clause returns \emph{zero}
+AAAI 2023 papers -- a convincing-looking coverage gap; the wildcard above recovers eighteen. ICML
+and AISTATS share the single source title \emph{Proceedings of Machine Learning Research} with UAI,
+CoRL, COLT and L4DC, and are separable only by conference name; CPAIOR is inside Springer's LNCS
+series, shared with dozens of unrelated conferences, and is likewise identifiable only by conference
+name. Scopus silently matches nothing for a quoted phrase containing \texttt{+}, which is how a
+known in-scope paper was lost for two revisions. And \texttt{TITLE-ABS-KEY} searches keyword fields:
+\(167\) of the \(379\) records carry no matching phrase in their title or abstract and matched on
+author or index keywords, so a local regular expression over titles and abstracts does \emph{not}
+reproduce this record set.
+
+The query reached its current form through five revisions, each scored against the known answer
+described next, recovering \(4\), \(9\), \(13\), \(14\) and \(14\) of the \(19\) scoring papers in
+turn. One revision is instructive: replacing three literal phrases with a proximity operator that
+appeared to subsume them lost a record, because the two forms behave differently against keyword
+fields. Redundant disjuncts are free. Add terms; do not remove them.
+
+\subsection{Search Recall}
+
+Because the window overlaps the surveys' coverage, the frame contains a set of papers the search
+should have found: the \(19\) works cited by a survey that were published at one of the eleven
+venues in 2023. The search returns \(14\) of them, a recall of \(74\%\).
+
+We report this rather than smoothing it over, with two qualifications. The scoring set has \(19\)
+members, so the interval around \(74\%\) is wide. And a miss here is a failure of the search, not a
+gap in the corpus: every one of the five is in the frame through a survey. What the misses share is
+instructive -- a pricing paper in \emph{MSOM}, a learned-surrogate paper for combinatorial problems,
+two perturbation-based gradient-estimation papers and a satisfiability-layer paper -- namely almost
+no vocabulary in common with the terms this literature uses about itself. Keyword search will not
+reach \(100\%\) recall on this literature, and that is the argument for building the frame from two
+sources with different failure modes rather than for tuning the query further.
+
+Of the \(379\) records, \(28\) are works a survey already cites and \(351\) are new to the frame.
+
+\subsection{Replication}
+
+Elsevier's terms restrict redistributing downloaded records, and the abstracts in them are publisher
+copyright, so the raw export is not part of the replication package. What is committed is the query
+above, the export date, the code that assigns venues and applies the window, and, for all \(379\)
+records, the Scopus identifier, DOI, title, authors, venue and year. Anyone with Scopus access can
+recover the exact record set from those identifiers, or re-run the query and compare. The reference
+lists of the two surveys are committed in full, as are the screening labels of
+\cref{sec:ECVenueScreen} and \cref{sec:ECSurveyScreen} and the grounds recorded for each.
+
+\section{Screening the Venue Papers}
+\label{sec:ECVenueScreen}
 
 The venue sweep returns \(379\) records at the eleven venues. Most are not about contextual
 optimization at all: the query is deliberately recall-oriented (\cref{sec:ECSearch}), and terms such
@@ -169,3 +342,108 @@ tied to a fixed identifier and a fixed prompt hash. Perhaps the most honest stat
 this stage is designed so that its failures are recoverable, not so that it is correct: every
 subsequent stage of the audit works from full texts, and the screening log records a ground for
 each exclusion so that a reader may disagree with any of them individually.
+
+\section{Screening the Survey References}
+\label{sec:ECSurveyScreen}
+
+The other half of the frame is what the two surveys cite: \(313\) bibliography entries, \(305\)
+distinct works once entries for the same work are merged, of which \(38\) are cited by both
+(\cref{sec:ECSearch}). Two entries are the surveys citing each other and are set aside rather than
+classified, leaving \(303\) works.
+
+This half carries less information than the venue sweep, and the screen is correspondingly coarser.
+A bibliography prints a title, a venue and a year; it prints no abstract, and a title in this
+literature routinely describes a method while leaving the setting to the experiments
+(\cref{sec:ECVenueScreen}). We therefore do not ask the triage question here. We ask a weaker one: is
+this work \emph{plainly background} -- cited for context, and certainly not a paper that proposes,
+analyses, benchmarks or applies methods in the area? A survey's bibliography is a closed set, so
+unlike the venue sweep it needs no keyword gate; it is screened exhaustively.
+
+\subsection{The Rule}
+
+A work is classified as background only if it falls in one of six named categories: a textbook,
+monograph or encyclopedic survey of a general field; a general machine-learning method,
+architecture or training technique with no decision problem as its object; a general statistical or
+estimation method with no downstream decision; general-purpose software, a solver manual or a
+dataset release; a classical optimization algorithm or result with nothing learned or predicted in
+it; or work in an unrelated field. A work plausibly proposing, analysing, benchmarking, surveying or
+applying methods in the area is a candidate. Everything else is borderline.
+
+Two features carry over from \cref{sec:ECVenueScreen}. The burden is on exclusion: background requires
+that any expert in the area would agree without hesitation, and hesitation itself is a verdict.
+And no work is excluded for reading like solver or machinery work, for the reason documented there.
+Two features are new. A survey, tutorial or software library \emph{of this area} is a candidate
+rather than background, since such works often carry benchmarks -- the two surveys from which this
+frame is built are themselves an example. And the rule states explicitly that the model may use what it knows about a
+cited work, since that is what any reader does with a reference string; we return to what this
+reliance costs below.
+
+\subsection{Implementation}
+
+The implementation follows \cref{sec:ECVenueScreen}: the same pinned model identifier
+\texttt{claude-opus-4-5-20251101}, greedy decoding, three runs with a majority bucket, and per
+record a one-sentence ground in the model's own words, a self-reported confidence, the model
+identifier, the prompt hash \texttt{37b31a8a9812} and the run date. The prompt is different because
+the input and the question are different, and it is versioned in the replication repository as the
+statement of the rule. Where a work is cited by both surveys, the model is shown both printed
+strings at once.
+
+The control set is built the same way and enforced the same way: \(20\) works known to be in scope,
+none of which may come back as background, and \(6\) whose exclusion no reader would dispute, all of
+which must. One detail is worth stating because it is easy to get wrong. A control set whose members
+are named in the instrument it validates tests nothing, and both the worked examples and the
+category lists in a prompt name papers. The script therefore asserts that no control work appears in
+the prompt before it runs, and the examples were chosen from outside the frame for that reason. All
+\(26\) controls pass.
+
+\subsection{Outcome, and Why We Did Not Sample}
+
+The screen assigns \(176\) works as candidates, \(85\) as background and \(42\) as borderline, with
+\(302\) of the \(303\) unanimous across the three runs.
+
+Here we depart from the venue-side design. There we measured the exclusion rate on a random sample,
+because relabelling all \(221\) excluded records by hand was not a reasonable use of a reader.
+Here the excluded pile is \(85\) works, each a single printed line, and reading all of them costs
+about what reading a \(50\)-record sample costs on the venue side. One author therefore reviewed
+every work the screen did not unanimously retain -- all \(85\) background, all \(42\) borderline,
+\(127\) in total -- with the model's stated ground beside each reference string. A census returns a
+count where a sample returns an interval, and we prefer the count.
+
+Of the \(85\) background calls, none was overturned. We report that as it stands, with no confidence
+statement attached: under one reader's application of the written rule, \(0\) of \(85\) exclusions
+were wrong. The \(42\) borderline works were ruled \(32\) background and \(10\) candidate, leaving
+\(186\) candidates and \(117\) background of the \(305\) works.
+
+Those borderline rulings are a scope statement as much as a screening decision, and we record them
+as such (\cref{sec:ECInclusion}). Ruled out: data-driven decision-making with no contextual
+information, inverse optimization and inverse reinforcement learning, sequential decision-making,
+and value-aware model learning. Ruled in: optimization proxies and learned solvers, which is the
+same boundary the venue-side revision redrew, reached independently on the other half of the frame.
+
+\subsection{Merging the Two Halves}
+
+The two screens are applied to overlapping literatures and on two works they disagree: both were
+ruled background here and retained by the venue triage. We retain them. An exclusion is terminal
+only at full text, where the inclusion rules of \cref{sec:ECInclusion} are applied, and the two
+screens ask deliberately different questions, so a disagreement between them is not a contradiction
+to be resolved at this stage. The merged list is \(318\) papers: \(130\) found only by the venue
+sweep, \(160\) cited only by the surveys, and \(28\) by both.
+
+\subsection{Scope of the Claim}
+
+Two limitations deserve to be stated plainly. The first is that a reference string is thin evidence,
+and the rule leans on what a reader already knows about a cited work. That is a strength for the
+papers this frame exists to capture -- a reader who recognizes \citet{berthet2020learning} from its
+title does not need its abstract -- and a weakness everywhere else, since the same reliance is
+invisible in the record. It is one reason the rule excludes nothing that is not plainly background.
+
+The second is a deliberate trade against the venue-side design. The measurement of
+\cref{sec:ECVenueScreen} was made blind: the model's bucket, ground and confidence were withheld from the
+reader so that the reading was independent. This census was not. The reviewer saw the model's stated
+ground beside each record, which is what made reading \(127\) works in one sitting practical, and
+which also means the review is a check on stated reasoning rather than an independent relabelling.
+We regard the coverage as worth the loss of independence at this stage -- a census of a small pile
+with the grounds visible catches a class of error that a blind sample of the same pile would
+mostly miss, namely a ground that is plausible in isolation and wrong for this literature -- but
+the two numbers are not the same kind of number, and we do not pool them. An independent second
+reader on a subsample of these records is owed, and we report it when it exists.

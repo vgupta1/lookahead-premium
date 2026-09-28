@@ -15,6 +15,14 @@ guarantees.
     04_retrieve/          the list of papers to obtain
     05_fulltext_review/   (empty) the inclusion gates and extraction, still to be built
 
+`ec_screening_draft.tex` sits beside those folders: the e-companion sections that describe steps
+01 and 02 for the journal paper -- how the frame was built, and how each half of it was screened.
+It is prose to be lifted into the manuscript, so it is kept with the data it describes rather than
+in the manuscript repository, and its three sections are `sec:ECSearch`, `sec:ECVenueScreen` and
+`sec:ECSurveyScreen`. It refers to `sec:ECInclusion`, the inclusion rules, which is not written:
+that section belongs to 05, which does not exist yet. **Every count in it is a count in these
+files**, so a number that changes here changes there.
+
 ## 01_search
 
 Two independent sources of candidates.
@@ -114,6 +122,16 @@ in the audit; not referenced and not held is nothing to act on, and is **not** e
 appendix exists — short page limits mean authors often never mention a supplement. "No appendix
 exists" is unfalsifiable and is not recorded; where a search looked belongs in the retrieval log.
 
+**Starting locations, and what they are worth.** 286 of the 318 rows carry a `url`: for a venue
+paper, the Scopus record the search itself returned, which is the right paper by construction; for a
+survey reference, the record its title matched, which is exactly as reliable as that match.
+`url_source` says which. **A survey-side link is a lead, not an identifier** — whoever fetches the
+paper checks the landing page against the reference string and reports it when it is wrong, and the
+instructions they are given must say so. 128 of the 160 survey references have one, of which 47
+matched a Scopus record carrying no DOI at all (`link_only` in the match file), so for those the
+record page is the only handle we have. 32 rows have neither a DOI nor a link: preprints, theses,
+workshop papers and books, which Scopus does not index.
+
 **DOIs.** 163 of the 318 now carry one: 82 from the venue search, 79 verified from the Scopus title
 lookups, 2 accepted by VG on review. `doi_source` says which of the three a row's DOI came from. `build_doi_lookup_queries.py` writes the query blocks; VG runs them and saves the exports;
 `merge_doi_lookups.py` matches the records back. **A DOI is accepted only when the title, the first
@@ -170,6 +188,7 @@ in "What is deliberately not in this repository" below.
     doi_matches_2026-09-22.csv                        every title match, with the evidence for it
     doi_matches_vg_rulings_2026-09-22.csv             the 9 matches a script should not decide
 05_fulltext_review/                                   nothing yet
+ec_screening_draft.tex                                the e-companion write-up of 01-02
 ```
 
 ## Two prefixes, and what the dates mean

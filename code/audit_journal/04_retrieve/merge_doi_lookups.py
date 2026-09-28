@@ -22,13 +22,18 @@ DECISIONS
             and the drift the old rule flagged pointed the right way: eight of the nine rows it sent
             to review were a preprint whose published version Scopus dates two to four years later,
             which is the version of record we want. `year_delta` carries the drift as evidence.
+  link_only the same match, but the Scopus record carries no DOI -- common for conference papers.
+            We keep its Scopus record page, which is a starting location for whoever fetches the
+            paper and nothing more: it is exactly as reliable as the title match behind it.
   review    similarity in [MANUAL, AUTO), a short title two papers could share, a surname that does
             not agree, or two different Scopus records matching equally well
   none      nothing scored above MANUAL: no Scopus record, which is expected for preprints,
             theses, workshop papers and books
 
 The output is dated because it records one set of lookups run on one day. `papers_to_obtain.csv`
-reads only the `accepted` rows.
+takes DOIs from the `accepted` rows and from VG's rulings, and takes the Scopus record page from
+any row that has one -- flagged there as an unverified location, since a link is a lead and not an
+identifier.
 """
 import csv, os, re, glob, difflib, unicodedata, collections
 
@@ -108,7 +113,7 @@ for r in rows:
         out.append(dict(survey_ref_id=r["survey_ref_id"], decision="none", title_score=round(best, 3),
                         our_title=r["title"], our_year=r["year"], our_first_author=r["first_author"],
                         doi="", scopus_title="", scopus_year="", scopus_source="", scopus_eid="",
-                        year_delta="", surname_match="", export_file="",
+                        scopus_link="", year_delta="", surname_match="", export_file="",
                         why="no Scopus record scored above the manual-review threshold"))
         continue
     sn = surname(s["Authors"])
@@ -142,6 +147,7 @@ for r in rows:
                     our_title=r["title"], our_year=r["year"], our_first_author=r["first_author"],
                     doi=(s.get("DOI") or "").strip(), scopus_title=s["Title"], scopus_year=s["Year"],
                     scopus_source=s.get("Source title", ""), scopus_eid=s.get("EID", ""),
+                    scopus_link=(s.get("Link") or "").strip(),
                     year_delta=delta, surname_match="yes" if ok_name else "no",
                     export_file=s["_file"], why=why))
 
@@ -152,7 +158,9 @@ assert not dup, f"the same DOI was accepted for more than one row: {dup}"
 
 for o in out:
     if o["decision"] == "accepted" and not o["doi"]:
-        o["decision"], o["why"] = "none", "matched a Scopus record that carries no DOI"
+        o["decision"] = "link_only"
+        o["why"] = ("title and surname agree, but the Scopus record carries no DOI; its record "
+                    "page is kept as a starting location")
 
 with open(OUT, "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=list(out[0].keys())); w.writeheader(); w.writerows(out)
@@ -183,9 +191,10 @@ elif review:
 C = collections.Counter(o["decision"] for o in out)
 print(f"{os.path.relpath(OUT, DATA)}: {len(out)} survey-side rows needing a lookup, "
       f"{len(scopus)} Scopus records from {len(exports)} exports")
-print(f"  accepted : {C['accepted']}")
-print(f"  review   : {C['review']}")
-print(f"  none     : {C['none']}")
+print(f"  accepted  : {C['accepted']}   (DOI verified against title, surname)")
+print(f"  link_only : {C['link_only']}   (same match, no DOI in Scopus; record page kept)")
+print(f"  review    : {C['review']}")
+print(f"  none      : {C['none']}")
 if C["review"]:
     print("\nfor VG, in the order they appear in the file:")
     for o in out:

@@ -19,6 +19,12 @@ DEDUPLICATION. A work cited by a survey AND found by the venue search is ONE row
 The link is the `frame_id` column of venue_papers_no_abstracts (28 papers). Survey-side duplicates
 were already collapsed by `dup_of`, so a work both surveys cite is one row too.
 
+`url` IS A LEAD, NOT AN IDENTIFIER. For a venue paper it is the Scopus record the search returned,
+so it is the right paper by construction. For a survey reference it is the record its title matched,
+which is as reliable as that match -- good enough to start from, not good enough to trust. Whoever
+fetches the paper checks the landing page against the reference string, and says so when it is
+wrong. `url_source` records which of the two a row has.
+
 COLUMN NAMES follow the folder's two prefixes: `source` is venue_papers / survey_refs / both,
 `venue_paper_id` is what 02_screen calls `sweep_id`, `survey_ref_id` is its `frame_id`, and
 `survey_refs_bucket` records the survey screen's verdict on a row the venue screen kept.
@@ -61,11 +67,17 @@ for f, r in refs.items():
 # never reach a student; `doi_source` records which of the two accepted it.
 doi_path = os.path.join(DATA, "04_retrieve", f"doi_matches_{DOI_DATE}.csv")
 rulings_path = os.path.join(DATA, "04_retrieve", f"doi_matches_vg_rulings_{DOI_DATE}.csv")
-verified_doi, ruled_doi = {}, {}
+verified_doi, ruled_doi, scopus_page = {}, {}, {}
 if os.path.exists(doi_path):
     for r in csv.DictReader(open(doi_path, encoding="utf-8")):
         if r["decision"] == "accepted" and r["doi"].strip():
             verified_doi[r["survey_ref_id"]] = r["doi"].strip()
+        # The Scopus record page of whatever record the title matched, DOI or no DOI. It is a
+        # STARTING LOCATION for whoever fetches the paper, not an identifier: it is exactly as
+        # reliable as the match behind it, and a reader who lands on the wrong paper should say so
+        # rather than assume the list is right.
+        if r.get("scopus_link", "").strip():
+            scopus_page[r["survey_ref_id"]] = (r["scopus_link"].strip(), r["scopus_eid"].strip())
 if os.path.exists(rulings_path):
     for r in csv.DictReader(open(rulings_path, encoding="utf-8")):
         ruling = (r["vg_ruling"] or "").strip().lower()
@@ -98,7 +110,7 @@ for vid, lab in sorted(venue_labels.items()):
         source="both" if rid else "venue_papers", venue_paper_id=vid, survey_ref_id=rid,
         first_author=surname(k["authors"]), year=k["year"], venue=k["venue"],
         title=k["title"], doi=k["doi"], doi_source=("scopus_venue_search" if k["doi"] else ""),
-        url=k["url"], eid=k["eid"],
+        url=k["url"], url_source=("scopus_venue_record" if k["url"] else ""), eid=k["eid"],
         survey_refs_bucket=(ref_labels[rid]["final_bucket"] if rid else ""),
         reference="" if not rid else " ".join(members[rid][0]["full_entry"].split()),
         bibkey_prefix=f"{surname(k['authors'])}{k['year']}_"))
@@ -113,7 +125,10 @@ for rid, lab in sorted(ref_labels.items()):
     rows.append(dict(
         source="survey_refs", venue_paper_id="", survey_ref_id=rid,
         first_author=surname(m[0]["first_author"] + ","), year=m[0]["year"], venue="",
-        title=best_title(m), doi=doi, doi_source=src, url="", eid="",
+        title=best_title(m), doi=doi, doi_source=src,
+        url=scopus_page.get(rid, ("", ""))[0],
+        url_source=("scopus_title_match" if rid in scopus_page else ""),
+        eid=scopus_page.get(rid, ("", ""))[1],
         survey_refs_bucket="CANDIDATE",
         reference=" ".join(m[0]["full_entry"].split()),
         bibkey_prefix=f"{surname(m[0]['first_author'] + ',')}{m[0]['year']}_"))
@@ -123,7 +138,7 @@ blank = ["bibkey", "pdf_filename", "source_type", "version", "urldate", "appendi
 for r in rows:
     r.update({c: "" for c in blank})
 cols = ["source", "venue_paper_id", "survey_ref_id", "first_author", "year", "venue", "title",
-        "doi", "doi_source", "url", "eid", "survey_refs_bucket", "reference",
+        "doi", "doi_source", "url", "url_source", "eid", "survey_refs_bucket", "reference",
         "bibkey_prefix"] + blank
 with open(os.path.join(DATA, OUT), "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(rows)
@@ -139,6 +154,9 @@ print(f"  carry a DOI              : {sum(1 for r in rows if r['doi'].strip())}"
       f"verified title lookup {sum(1 for r in rows if r['doi_source'] == 'scopus_title_lookup_verified')}, "
       f"VG-ruled {sum(1 for r in rows if r['doi_source'] == 'scopus_title_lookup_vg_ruled')})")
 print(f"  no DOI yet               : {sum(1 for r in rows if not r['doi'].strip())}")
+print(f"  carry a starting location: {sum(1 for r in rows if r['url'].strip())}"
+      f"  ({dict(collections.Counter(r['url_source'] for r in rows if r['url'].strip()))})")
+print(f"  no DOI and no location   : {sum(1 for r in rows if not r['doi'].strip() and not r['url'].strip())}")
 print(f"  -> every one of the {len(rows)} is to be obtained: version of record plus appendix")
 if not os.path.exists(doi_path):
     print(f"\n  note: {os.path.basename(doi_path)} not found -- run merge_doi_lookups.py to fill "
