@@ -49,6 +49,72 @@ import csv, os, re, collections
 
 SCREEN_DATE = "2026-09-22"          # the survey screen's labels; a dated input, not our output
 DOI_DATE = "2026-09-22"             # the Scopus DOI lookups, if they have been run
+# ACCESS ROUTE (2026-09-29): where the version of record is expected to be fetched from, so the
+# open-access rows can be scripted and the rest assigned to the students. Priority: the venue of a
+# venue-sweep row, else the DOI's registrant prefix, else keywords in the survey's printed
+# reference. A planning aid: the route actually used is recorded in the retrieval sheet.
+# route -> (open access?, description)
+ROUTES = {
+    "neurips":    (True,  "proceedings.neurips.cc"),
+    "pmlr":       (True,  "proceedings.mlr.press (ICML, AISTATS)"),
+    "openreview": (True,  "openreview.net (ICLR)"),
+    "aaai":       (True,  "ojs.aaai.org"),
+    "ijcai":      (True,  "ijcai.org/proceedings"),
+    "jmlr":       (True,  "jmlr.org"),
+    "jair":       (True,  "jair.org"),
+    "arxiv":      (True,  "arXiv preprint (no published version known)"),
+    "ssrn":       (True,  "SSRN / Optimization Online working paper"),
+    "mdpi":       (True,  "MDPI (open access journal)"),
+    "lipics":     (True,  "LIPIcs / Dagstuhl (CP proceedings, open access)"),
+    "informs":    (False, "INFORMS journals (OR, MS, MSOM, IJOC, IJOO, Tutorials)"),
+    "springer":   (False, "Springer (LNCS incl. CPAIOR/CP, journals)"),
+    "elsevier":   (False, "Elsevier journals (EJOR, TR-B, ...)"),
+    "ieee":       (False, "IEEE"),
+    "acm":        (False, "ACM"),
+    "other_paywalled": (False, "other publisher (T&F, SIAM, World Scientific, ...)"),
+    "search":     (False, "no venue/DOI to go on: workshop, thesis, tutorial, or bare title"),
+}
+VENUE = {"NeurIPS": "neurips", "ICML": "pmlr", "AISTATS": "pmlr", "ICLR": "openreview",
+         "AAAI": "aaai", "IJCAI": "ijcai", "OR": "informs", "MS": "informs",
+         "MSOM": "informs", "IJOC": "informs", "CPAIOR": "springer"}
+DOI_PREFIX = {"10.1287": "informs", "10.1016": "elsevier", "10.1007": "springer",
+              "10.1609": "aaai", "10.24963": "ijcai", "10.1109": "ieee", "10.1145": "acm",
+              "10.1613": "jair", "10.3390": "mdpi", "10.4230": "lipics", "10.2139": "ssrn", "10.48550": "arxiv"}
+# first match wins; order matters (e.g. a workshop at NeurIPS is not NeurIPS proceedings)
+REF_RULES = [
+    (r"Tutorials in operations research", "informs"),
+    (r"workshop|tutorial|university of|univ\b|thesis", "search"),
+    (r"Neural Information Processing Systems", "neurips"),
+    (r"Machine Learning Research|PMLR|International Conference on Machine Learning|"
+     r"Artificial Intelligence and Statistics", "pmlr" ),
+    (r"Learning Representations", "openreview"),
+    (r"AAAI", "aaai"),
+    (r"International Joint Conference", "ijcai"),
+    (r"Journal of Machine Learning Research", "jmlr"),
+    (r"Journal of Artificial Intelligence Research", "jair"),
+    (r"arXiv", "arxiv"),
+    (r"ssrn|optimizationonline|optimization-online", "ssrn"),
+    (r"INFORMS|Operations Research|Management Science|Manufacturing & Service", "informs"),
+    (r"European Journal of Operational Research|Transportation Research", "elsevier"),
+    (r"Springer|Lecture Notes", "springer"),
+    (r"IEEE", "ieee"),
+    (r"\bACM\b", "acm"),
+]
+
+
+def access_route(r):
+    if r["venue"]:
+        return VENUE[r["venue"]]
+    if r["doi"]:
+        prefix = r["doi"].split("/")[0]
+        return DOI_PREFIX.get(prefix, "other_paywalled")
+    ref = r["reference"]
+    for pat, name in REF_RULES:
+        if re.search(pat, ref, re.I):
+            return name
+    return "search"
+
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data", "audit_journal"))
 OUT = "04_retrieve/papers_to_obtain.csv"
@@ -137,8 +203,9 @@ blank = ["bibkey", "pdf_filename", "source_type", "version", "urldate", "appendi
          "version_check", "notes"]
 for r in rows:
     r.update({c: "" for c in blank})
+    r["access_route"] = access_route(r)
 cols = ["source", "venue_paper_id", "survey_ref_id", "first_author", "year", "venue", "title",
-        "doi", "doi_source", "url", "url_source", "eid", "survey_refs_bucket", "reference",
+        "doi", "doi_source", "access_route", "url", "url_source", "eid", "survey_refs_bucket", "reference",
         "bibkey_prefix"] + blank
 with open(os.path.join(DATA, OUT), "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(rows)
@@ -157,6 +224,10 @@ print(f"  no DOI yet               : {sum(1 for r in rows if not r['doi'].strip(
 print(f"  carry a starting location: {sum(1 for r in rows if r['url'].strip())}"
       f"  ({dict(collections.Counter(r['url_source'] for r in rows if r['url'].strip()))})")
 print(f"  no DOI and no location   : {sum(1 for r in rows if not r['doi'].strip() and not r['url'].strip())}")
+R = collections.Counter(r["access_route"] for r in rows)
+n_open = sum(v for k, v in R.items() if ROUTES[k][0])
+print(f"  access route             : {n_open} open access, {len(rows) - n_open} paywalled/manual  "
+      f"{dict(R.most_common())}")
 print(f"  -> every one of the {len(rows)} is to be obtained: version of record plus appendix")
 if not os.path.exists(doi_path):
     print(f"\n  note: {os.path.basename(doi_path)} not found -- run merge_doi_lookups.py to fill "
