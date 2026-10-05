@@ -181,6 +181,20 @@ be settled from the papers' text and was established from the benchmark's public
 The audit is a sample, not a census, and a fuller version -- counting (paper, configuration)
 pairs rather than papers -- is future work.
 
+**Paper titles — added after the workshop (2026-10-05).** As submitted, `audit.csv` identified each
+paper only by its citation key, authors, venue and year, and the paper's own bibliography does not
+cite 16 of the 35 papers in the pool, most of them exclusions, so the package never said in full which works the audit read. A workshop reviewer
+pointed this out. `data/audit_workshop/references.csv` closes the gap: one row per `audit.csv`
+key, with the full title, the author list, venue, year, DOI where one exists and the arXiv
+identifier, and an `audited_copy` column recording which version of each paper the evidence rows
+were read against (an arXiv version number, or the proceedings or journal copy). The bibliographic
+fields describe the version of record. Where that differs from the audited copy, or from what
+`audit.csv` records (a changed title, a later publication year), `note` says so. No script reads
+the file and nothing in `audit.csv` or `evidence.csv` changed, so Table 1 is unaffected. The file
+first appears at the tag `workshop-references`; `workshop-submission` still reproduces the
+submitted state. This part of the repository is superseded by the journal version's audit in
+`data/audit_journal/`.
+
 ## What this repository does not reproduce
 
 One number in the paper does not come out of this code, and it is better to say so than to have a

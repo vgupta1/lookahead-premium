@@ -51,6 +51,19 @@ def test_audit_every_counted_paper_has_evidence():
         assert need <= have, (key, sorted(need - have))
 
 
+def test_audit_references_cover_every_paper():
+    """references.csv names every paper in audit.csv -- title, authors, venue, year and a DOI or
+    arXiv identifier -- and names nothing else."""
+    import pandas as pd
+    folder = os.path.dirname(audit.AUDIT)
+    keys = pd.read_csv(audit.AUDIT, dtype=str).key
+    refs = pd.read_csv(os.path.join(folder, "references.csv"), dtype=str).fillna("")
+    assert refs.key.is_unique and set(refs.key) == set(keys)
+    for col in ("title", "authors", "venue", "year", "audited_copy"):
+        assert (refs[col] != "").all(), col
+    assert ((refs.doi != "") | (refs.arxiv != "")).all()
+
+
 # --------------------------------------------------------------------------
 # Figure 1 and Table 3 -- the shortest-path autopsy
 # --------------------------------------------------------------------------
